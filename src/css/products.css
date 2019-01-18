@@ -1,0 +1,48 @@
+
+/* PRODUCTS --------------------------------------------------------------------- */
+
+.poeticsoft-utils .poeticsoft-utils-products .AgoraProductsView { 
+
+    position: absolute;
+    top: 8px;
+    right: 6px;
+    bottom: 8px;
+    left: 6px;
+}       
+
+.poeticsoft-utils .poeticsoft-utils-products .AgoraProductsView .k-header.k-grid-toolbar { 
+
+    text-align: right;
+    padding: 5px 2px 5px 5px;
+}    
+
+.poeticsoft-utils .poeticsoft-utils-products .AgoraProductsView td {
+
+    position: relative;
+}
+
+.poeticsoft-utils .poeticsoft-utils-products .AgoraProductsView td .State { 
+
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.poeticsoft-utils .poeticsoft-utils-products .AgoraProductsView td .State i{ 
+
+    display: inline-block;
+    width: 50%;
+    padding: 0 0 50% 0;
+    background-color: #ccc;
+    border-radius: 50%;
+}
+    
+.poeticsoft-utils .poeticsoft-utils-products .AgoraProductsView td .State.State_1 i { background-color: #f71f1f; }
+.poeticsoft-utils .poeticsoft-utils-products .AgoraProductsView td .State.State_2 i { background-color: #8ebc00; }
+
+.poeticsoft-utils .poeticsoft-utils-products .AgoraProductsView td.k-command-cell a.NoUpdatable { opacity: 0.2; }

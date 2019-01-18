@@ -1,0 +1,115 @@
+
+    /* EXCEL --------------------------------------------------------------------- */    
+
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools { 
+
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        left: 5px;
+        display: flex;
+    }
+
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-widget {
+
+        display: flex;
+        align-items: center;
+    }
+
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-widget.k-upload {
+
+        width: calc(100% - 200px);
+    }
+
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-widget.k-upload {
+
+        width: calc(100% - 200px);
+    }
+
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .Actions {
+
+        width: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+    }
+
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .Actions button.Attributes {
+
+        margin-right: 10px;
+    }
+
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-widget .k-dropzone {
+
+        width: 132px;
+    }
+
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-widget .k-dropzone .k-upload-button {
+
+        margin-right: 0;
+    }
+
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-widget .k-upload-files {
+
+        border: none;
+        padding: 0;
+        line-height: 100%;
+        width: calc(100% - 132px);
+    }
+
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-widget .k-upload-files .k-file  {
+
+        border: none;
+        padding: 0 0;
+    }
+
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-widget .k-upload-files .k-file .k-upload-status {
+
+        top: 6px;       
+    }
+
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-widget > button {
+
+        display: none;
+    }
+
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-upload .k-dropzone {
+
+        padding: 5px;
+    }
+
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-upload .k-file-extension-wrapper {
+        
+        width: 26px;
+        height: 26px;
+    }
+
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-upload .k-file-name-size-wrapper {
+        
+        font-size: 90%;
+    }
+
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetView { 
+
+        position: absolute;
+        top: 53px;
+        right: 7px;
+        bottom: 8px;
+        left: 5px;
+    }
+
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetView .k-spreadsheet {
+
+        width: 100%;
+        height: 100%;
+    }
+    
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetView .k-spreadsheet .k-spreadsheet-quick-access-toolbar {
+
+        display: none;
+    }
+
+    .k-spreadsheet-message-content {
+
+        margin: 0 20px;
+    }

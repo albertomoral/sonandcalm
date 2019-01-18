@@ -1,0 +1,31 @@
+
+/* UPLOAD IMAGES --------------------------------------------------------------------- */
+
+.poeticsoft-utils .poeticsoft-utils-upload-images .UploadImageTools { 
+
+	padding: 26px 29px 10px 0;
+	position: absolute;
+	right: 0;
+	top: 0;
+	z-index: 1;
+}
+
+.poeticsoft-utils .poeticsoft-utils-upload-images .k-upload { 
+
+	height: 100%;
+	position:relative;
+}
+
+.poeticsoft-utils .poeticsoft-utils-upload-images .k-upload .k-upload-files {                
+
+	height: calc(100% - 108px);
+	overflow-y: scroll;
+	padding-bottom: 0;
+	margin-bottom: 5px;
+}
+
+.poeticsoft-utils .poeticsoft-utils-upload-images .k-upload .k-button.k-clear-selected,               
+.poeticsoft-utils .poeticsoft-utils-upload-images .k-upload .k-button.k-upload-selected {                
+
+	border-top: solid #dbdbdb 1px;
+}    

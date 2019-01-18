@@ -1,0 +1,54 @@
+
+    .poeticsoft-utils {
+
+        position: relative;
+        /* margin-left: -20px;        */
+    }
+    
+    .poeticsoft-utils .Status {
+
+        position: absolute;
+        top: 20px; 
+        right: 20px;
+        padding: 10px 0;  
+        min-height: 20px;
+        text-align: right;      
+    }
+
+    .poeticsoft-utils .Status.Info { color: rgb(3, 180, 18); }
+    .poeticsoft-utils .Status.Warn { color: rgb(192, 132, 2); }
+    .poeticsoft-utils .Status.Error { color: rgb(204, 24, 0); }
+    
+    .poeticsoft-utils > .k-tabstrip-wrapper { 
+
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+    }
+
+    .poeticsoft-utils > .k-tabstrip-wrapper > .k-tabstrip { 
+
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+    }
+
+    .poeticsoft-utils > .k-tabstrip-wrapper > .k-tabstrip > .k-tabstrip-items{ 
+
+        padding: 5px 20px 0;
+
+    }   
+    
+    .poeticsoft-utils .k-tabstrip-wrapper .k-content {         
+
+        position: absolute;
+        top: 41px;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        overflow: hidden;
+    }
