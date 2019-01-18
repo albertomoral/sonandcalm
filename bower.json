@@ -1,0 +1,20 @@
+{
+  "name": "poeticsoft-bracnoria",
+  "authors": [
+    "'albertomoral <'alberto.moral@poeticsoft.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "kendo-ui": "https://bower.telerik.com/bower-kendo-ui.git#^2018.3.1219"
+  }
+}
