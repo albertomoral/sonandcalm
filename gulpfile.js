@@ -36,6 +36,7 @@
 			'./src/service/datasource.js',
 			'./src/service/errors.js',
 			'./src/service/utils.js',
+			'./src/directive/dialog.js',
 			'./src/directive/excel.js',
 			'./src/directive/products.js',
 			'./src/directive/images.js',

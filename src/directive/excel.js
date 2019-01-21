@@ -7,7 +7,7 @@
 
 			// Loading Excel file
 
-			$scope.agoraLoadConfig = {
+			$scope.AgoraLoadConfig = {
 				multiple: false,
 				async: {
 					saveUrl: '/product-images/upload.php',
@@ -26,7 +26,7 @@
 				}
 			}        
 		
-			$scope.agoraSpreadsheetConfig = {
+			$scope.AgoraSpreadsheetConfig = {
 				toolbar: {
 					home: false,
 					insert: false,
@@ -41,7 +41,7 @@
 			var BlockCodes = {};
 			var Families = {};
 
-			function mapRows(Rows) {
+			function digestRows(Rows) {
 				
 				var HeaderRow = Rows.shift();
 				var Fields = HeaderRow.cells.map(function(Cell) {
@@ -117,10 +117,27 @@
 			$scope.generateWebProducts = function() {			
 				
 				$scope.allowProcessing = false;
+
+				$scope.$emit('opendialog', {
+					Title: 'Processing products'
+				});
 				
 				var ProductsSheet = $scope.AgoraKendoSpreadsheet.sheetByName('Productos');
 				var Rows = ProductsSheet.toJSON().rows;
-				var Products = mapRows(Rows);
+				
+				DataSource.ProductsFromExcel = digestRows(Rows);
+
+				DataSource.mergeProducts()
+				.then(
+					function(Success) {
+
+						console.log('Success');
+					},
+					function(Error) {
+
+						console.log('Error');
+					}
+				)
 				
 				$scope.allowProcessing = true;
 			}
@@ -153,7 +170,7 @@
 					<input kendo-upload="AgoraKendoUpload"
 						     name="image"
 						     type="file"
-						     k-options="agoraLoadConfig"
+						     k-options="AgoraLoadConfig"
 					/>
 					<div class="Actions">
 						<button class="Generate k-button"
@@ -165,7 +182,7 @@
 				</div>
 				<div class="SpreadsheetView">
 					<div kendo-spreadsheet="AgoraKendoSpreadsheet"
-						k-options="agoraSpreadsheetConfig">
+						k-options="AgoraSpreadsheetConfig">
 					</div>
 				</div>
 			</div>`

@@ -19,6 +19,12 @@
 .poeticsoft-utils .poeticsoft-utils-products .AgoraProductsView td {
 
     position: relative;
+}    
+
+.poeticsoft-utils .poeticsoft-utils-products .AgoraProductsView td.Editable {
+
+    background-color: #eff5dc88;
+    cursor: pointer;
 }
 
 .poeticsoft-utils .poeticsoft-utils-products .AgoraProductsView td .State { 

@@ -38,6 +38,7 @@
                     <poeticsoft-utils-images></poeticsoft-utils-images>
                     <poeticsoft-utils-upload-images></poeticsoft-utils-upload-images>
                 </div>
+                <poeticsoft-utils-dialog></poeticsoft-utils-dialog>
             </div>`
         };
     });

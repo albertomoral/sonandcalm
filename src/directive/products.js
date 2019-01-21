@@ -1,4 +1,6 @@
 
+  //( https://docs.telerik.com/kendo-ui/controls/data-management/treelist/how-to/hide-edit-fields-on-different-levels
+
 	APP.directive(
 		'poeticsoftUtilsProducts', 
 	function() {
@@ -13,51 +15,49 @@
 
       // Editors
 
-      /*
-      function editCategories(container, options) {
-
-        $('<input required name="' + options.field + '"/>')
-        .appendTo(container)
-        .kendoDropDownList({
-          dataSource: DataSource.WooProductCategories,
-          dataValueField: 'id',
-          dataTextField: 'name'
-        });
-      }
-      */
+      /* Categories */
 
       var editCategories = function (container, options) {
         $('<select name="' + options.field + '"/>')
         .appendTo(container)
         .kendoMultiSelect({
           dataSource: DataSource.WooProductCategories,
-          autoBind: false,
+          valuePrimitive: true,
           dataValueField: 'id',
           dataTextField: 'name'
         });
       };
+      
+      $scope.getCategories = function(DataItem) {
 
-      $scope.getCategorie = function(id) {
+        var IDs = DataItem.category_ids.toJSON();
 
-        return DataSource.WooProductCategories.get(id).get('name');
-      }
+          //console.log('---------------------------');          
 
-      function editSize(container, options) {
+        return DataItem.category_ids.toJSON().map(function(ID) {
 
-        $('<input required name="' + options.field + '"/>')
-        .appendTo(container)
-        .kendoDropDownList({
-            autoBind: false,
-            dataSource: DataSource.WooSizes
-        });
+          var Categorie = DataSource.WooProductCategories.get(ID);
+          var Text = Categorie ? Categorie.get('name') : 'Error';
+          //console.log(ID);
+          //console.log(Text);          
+
+          return Text;
+        }).join(' - ');
       }
 
       $scope.productTreeListConfig = {
         dataSource: DataSource.WooProducts,
         height: '100%',
-        filterable: true,
         sortable: true,
-        editable: true,
+        editable: 'incell',
+        edit:function(E){
+
+          var Level = this.dataSource.level(E.model);
+          if(Level > 0) {
+
+            $scope.ProductKendoTreeList.closeCell();
+          }
+        },
         autoBind: false,
         columns: [
           {
@@ -73,9 +73,12 @@
           {
             field: 'category_ids',
             title: 'Categorias',
-            template: '<div>{{ dataItem.category_ids.map(getCategorie).join(" - ") }}</div>',
+            template: '<div>{{ getCategories(dataItem) }}</div>',
             editor: editCategories,
-            width: 200
+            width: 200,
+            attributes: {
+              class: 'Editable'
+            }
           },
           {
             field: 'image_id',
@@ -91,14 +94,22 @@
             field: 'stock_quantity',
             title: 'Stock',
             width: 90
-          },
-          { 
-            command: [
-              'edit'
-            ], 
-            width: 190
           }
-        ]/*,
+        ],
+        toolbar: [
+          'excel',
+          'pdf',
+          {
+            name: 'save',
+            text: 'Guardar todo',
+            click: function(){
+
+              DataSource.WooProducts.sync();
+            }
+          }
+        ]
+
+        /*
             
         toolbar: [
           { 
