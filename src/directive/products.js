@@ -5,97 +5,125 @@
 		'poeticsoftUtilsProducts', 
 	function() {
 
-		function controller($scope, Errors, DataSource, $window, $http) {
-
-      $scope.DataSource = DataSource;
+		function controller(
+      $scope, 
+      $timeout,
+      $element,
+      Errors, 
+      Products, 
+      Categories, 
+      $window, 
+      $http
+    ) {
 
       /* ----------------------------------------------------
-      PRODUCT TREE LIST
+        PRODUCT TREE LIST
       */
 
-      // Editors
-
-      /* Categories */
+      /* Categories editor */
 
       var editCategories = function (container, options) {
         $('<select name="' + options.field + '"/>')
         .appendTo(container)
         .kendoMultiSelect({
-          dataSource: DataSource.WooProductCategories,
+          dataSource: Categories.DS,
           valuePrimitive: true,
           dataValueField: 'id',
           dataTextField: 'name'
         });
       };
+
+      function beforeEdit(E) {
+
+        if(E.model.parent_sku) { E.preventDefault(); }
+      }
+
+      function cellClose(E) {
+
+        if(E.type == 'save') {
+
+          var NewValue = E.model.get('category_ids');
+          var ChildNodes = Products.DS.childNodes(E.model);
+
+          ChildNodes.forEach(function(Child) {
+
+            Child.set('category_ids', NewValue);
+          });
+        }
+      }
+
+      // Render categories field with names
       
       $scope.getCategories = function(DataItem) {
 
-        var IDs = DataItem.category_ids.toJSON();
+        if(!DataItem.category_ids) {
 
-          //console.log('---------------------------');          
+          return '';        
+        }
 
         return DataItem.category_ids.toJSON().map(function(ID) {
 
-          var Categorie = DataSource.WooProductCategories.get(ID);
+          var Categorie = Categories.DS.get(ID);
           var Text = Categorie ? Categorie.get('name') : 'Error';
-          //console.log(ID);
-          //console.log(Text);          
-
           return Text;
-        }).join(' - ');
-      }
+        })
+        .join(' - ');
+      }     
+
+      /* Columns config */
+
+      var Columns = [
+        {
+          field: 'name',
+          expandable: true,
+          title: 'Name'
+        },
+        {
+          field: 'sku',
+          title: 'SKU',
+          width: 200
+        },
+        {
+          field: 'category_ids',
+          title: 'Categorias',
+          template: '{{ getCategories(dataItem) }}',
+          editor: editCategories,
+          width: 200,
+          attributes: { class: 'Editable {{ dataItem.type }}' }
+        },
+        {
+          field: 'image_id',
+          title: 'Imagen',
+          width: 90
+        },
+        {
+          field: 'price',
+          title: 'Precio',
+          width: 90
+        },
+        {
+          field: 'stock_quantity',
+          title: 'Stock',
+          width: 90
+        }
+      ];
 
       $scope.productTreeListConfig = {
-        dataSource: DataSource.WooProducts,
-        height: '100%',
+        dataSource: Products.DS,
         sortable: true,
         editable: 'incell',
-        edit:function(E){
-
-          var Level = this.dataSource.level(E.model);
-          if(Level > 0) {
-
-            $scope.ProductKendoTreeList.closeCell();
-          }
+        beforeEdit: beforeEdit,
+        cellClose: cellClose,
+        collapse: function(e) {
+          
+          e.preventDefault();
         },
         autoBind: false,
-        columns: [
-          {
-            field: 'name',
-            expandable: true,
-            title: 'Name'
-          },
-          {
-            field: 'sku',
-            title: 'SKU',
-            width: 120
-          },
-          {
-            field: 'category_ids',
-            title: 'Categorias',
-            template: '<div>{{ getCategories(dataItem) }}</div>',
-            editor: editCategories,
-            width: 200,
-            attributes: {
-              class: 'Editable'
-            }
-          },
-          {
-            field: 'image_id',
-            title: 'Imagen',
-            width: 90
-          },
-          {
-            field: 'price',
-            title: 'Precio',
-            width: 90
-          },
-          {
-            field: 'stock_quantity',
-            title: 'Stock',
-            width: 90
-          }
-        ],
+        columns: Columns,
+        pageable: {
+          pageSize: 20,
+          pageSizes: [20, 50, 'All']
+        },
         toolbar: [
           'excel',
           'pdf',
@@ -104,40 +132,33 @@
             text: 'Guardar todo',
             click: function(){
 
-              DataSource.WooProducts.sync();
+              Products.DS.sync();
             }
           }
         ]
-
-        /*
-            
-        toolbar: [
-          { 
-            template: '<button data-ng-click="importExcel()" class="k-button" ">Copy from Excel</button>' 
-          },
-          'save',
-          { 
-            template: '<button data-ng-click="exportExcel()" class="k-button" ">Export Excel</button>' 
-          },
-          'cancel'
-        ]*/
-      }
-
-      // RESIZE
-
-      function resize() {        
-
-        // $scope.ProductKendoTreeList.resize();
-      }
-
-      angular.element($window).on('resize', resize);
-
-      $scope.$on("kendoWidgetCreated", function(event, widget){
+      }; 
       
-        if (widget === $scope.ProductKendoTreeList) {
-          
-          setTimeout(resize, 0);
-        }
+      $scope.TreeListReady = false;
+      $scope.$on('hideproductsgrid', function(event) {
+
+        $scope.$apply(function() {
+            
+          $scope.TreeListReady = false;
+        });
+      });
+
+      $scope.$on('showproductsgrid', function(event) {
+
+        $scope.$apply(function() {
+            
+          $scope.TreeListReady = true;
+
+          $timeout(function() {
+
+            var ProductKendoTreeList = $($element).find('#ProductKendoTreeList').data('kendoTreeList');
+            ProductKendoTreeList.refresh();
+          });
+        });
       });
 		}
 
@@ -147,10 +168,18 @@
 			scope: true,
 			controller: controller,
 			template: `<div class="poeticsoft-utils-products">
-				<div class="AgoraProductsView">
-					<div kendo-tree-list="ProductKendoTreeList"
-               k-options="productTreeListConfig">
-					</div>
+        <div class="WebProductsView">
+          <div kendo-tree-list="ProductKendoTreeList"
+               id="ProductKendoTreeList"
+               k-options="productTreeListConfig"
+               ng-if="TreeListReady">
+          </div>
+          <div class="k-loading-mask"
+               ng-if="!TreeListReady">
+            <span class="k-loading-text">Loading...</span>
+            <div class="k-loading-image"></div>
+            <div class="k-loading-color"></div>
+          </div>
 				</div>
 			</div>`
 		};

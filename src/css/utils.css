@@ -10,9 +10,12 @@
         position: absolute;
         top: 20px; 
         right: 20px;
-        padding: 10px 0;  
+        padding: 10px 20px;  
         min-height: 20px;
-        text-align: right;      
+        text-align: right; 
+        background-color: #fefefe;
+        border: 1px solid #ccc; 
+        box-shadow: 0 0 12px #00000066;
     }
 
     .poeticsoft-utils .Status.Info { color: rgb(3, 180, 18); }

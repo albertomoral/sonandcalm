@@ -33,9 +33,13 @@
 			'../bower_components/kendo-ui/js/kendo.all.min.js',
 			'../bower_components/jszip/dist/jszip.min.js',
 			'./src/module.js',
-			'./src/service/datasource.js',
+			'./src/service/datasource-categories.js',
+			'./src/service/datasource-products.js',
+			'./src/service/datasource-images.js',
+			'./src/service/excel-to-web.js',
 			'./src/service/errors.js',
 			'./src/service/utils.js',
+			'./src/service/data.js',
 			'./src/directive/dialog.js',
 			'./src/directive/excel.js',
 			'./src/directive/products.js',
@@ -64,7 +68,8 @@
 		])
 		.pipe(gulp.dest('./dist/fonts/glyphs/'));
 
-	  return;
+		// return;
+		return setTimeout(livereload.reload, 800);
 	});	
 
 	gulp.task('update_sonandcalm', ['compile_sonandcalm'], function() {	
@@ -105,7 +110,8 @@
 
 		gulp.watch(
 			['./src/**/*'], 
-			['update_sonandcalm']
+			// ['update_sonandcalm'], 
+			['compile_sonandcalm']
 		);
 	});
 

@@ -3,10 +3,10 @@
     'poeticsoftUtilsImages', 
   function() {
 
-    function controller($scope, Errors, DataSource, $window) {
+    function controller($scope, Errors, Images, $window) {
 
       $scope.imageGridConfig = {
-        dataSource: DataSource.Images,
+        dataSource: Images.DS,
         height: '100%',
         editable: 'inline',
         sortable: true,
@@ -61,7 +61,7 @@
 
       $scope.refresh = function() {
 
-        $scope.ImageKendoGrid.dataSource.read();
+        Images.DS.read();
       }       
 
       function resize() {        

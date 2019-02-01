@@ -1,54 +1,52 @@
 
 /* PRODUCTS --------------------------------------------------------------------- */
 
-.poeticsoft-utils .poeticsoft-utils-products .AgoraProductsView { 
+.poeticsoft-utils .poeticsoft-utils-products .WebProductsView { 
 
     position: absolute;
     top: 8px;
     right: 6px;
     bottom: 8px;
     left: 6px;
+}  
+
+.poeticsoft-utils .poeticsoft-utils-products .WebProductsView .k-loading-mask { 
+
+    width: 100%; 
+    height: 100%; 
+    top: 0px; 
+    left: 0px;
+}
+
+.poeticsoft-utils .poeticsoft-utils-products .WebProductsView .k-treelist { 
+
+    height: 100%;
 }       
 
-.poeticsoft-utils .poeticsoft-utils-products .AgoraProductsView .k-header.k-grid-toolbar { 
+.poeticsoft-utils .poeticsoft-utils-products .WebProductsView .k-treelist .k-header { 
 
-    text-align: right;
-    padding: 5px 2px 5px 5px;
-}    
+    /* text-align: right; */
+    padding: 5px;
+}          
 
-.poeticsoft-utils .poeticsoft-utils-products .AgoraProductsView td {
+.poeticsoft-utils .poeticsoft-utils-products .WebProductsView .k-treelist .k-grid-content { 
 
-    position: relative;
-}    
+    height: calc(100% - 114px) !important;
+}         
 
-.poeticsoft-utils .poeticsoft-utils-products .AgoraProductsView td.Editable {
+.poeticsoft-utils .poeticsoft-utils-products .WebProductsView .k-treelist .k-grid-content .k-icon.k-i-collapse { 
 
-    background-color: #eff5dc88;
+    margin: -2px 2px 0 0;
+}         
+
+.poeticsoft-utils .poeticsoft-utils-products .WebProductsView .k-treelist .k-grid-content .k-icon.k-i-collapse:before { 
+
+    content: "\e525";
+} 
+
+.poeticsoft-utils .poeticsoft-utils-products .WebProductsView td.Editable.Variable,
+.poeticsoft-utils .poeticsoft-utils-products .WebProductsView td.Editable.Simple {
+
+    background-color: #eff5dc66;
     cursor: pointer;
 }
-
-.poeticsoft-utils .poeticsoft-utils-products .AgoraProductsView td .State { 
-
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.poeticsoft-utils .poeticsoft-utils-products .AgoraProductsView td .State i{ 
-
-    display: inline-block;
-    width: 50%;
-    padding: 0 0 50% 0;
-    background-color: #ccc;
-    border-radius: 50%;
-}
-    
-.poeticsoft-utils .poeticsoft-utils-products .AgoraProductsView td .State.State_1 i { background-color: #f71f1f; }
-.poeticsoft-utils .poeticsoft-utils-products .AgoraProductsView td .State.State_2 i { background-color: #8ebc00; }
-
-.poeticsoft-utils .poeticsoft-utils-products .AgoraProductsView td.k-command-cell a.NoUpdatable { opacity: 0.2; }

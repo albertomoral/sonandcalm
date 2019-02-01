@@ -1,5 +1,11 @@
 
-APP.factory('Utils', function ($q, $timeout, Errors) {
+APP.factory(
+	'Utils', 
+function (
+	$q, 
+	$timeout, 
+	Errors
+) {
 
 	var Self = {};	
 	
@@ -27,5 +33,6 @@ APP.factory('Utils', function ($q, $timeout, Errors) {
 	Self.BlockCodes = {};
 
   return Self;
-});
+	}
+);
         

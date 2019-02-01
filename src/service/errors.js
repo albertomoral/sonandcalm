@@ -1,15 +1,36 @@
 
-APP.factory('Errors', function ($q, $timeout) {
+APP.factory(
+   'Errors',
+function (
+  $q, 
+  $timeout
+) {
 
-    var Self = {};    
+	var Self = {};
+	
+	Self.$Errors = null;
 
-    Self.showErrors = function(Error) {
+	Self.showErrors = function(Error) {
 
-        jQuery('.poeticsoft-utils .Status')
-        .addClass('Error')
-        .html(Error.errors);;
-    }
+		console.log(Error);
 
-    return Self;
+		Self.$Errors
+		.addClass('Error')
+		.html(Error.errors)
+		.show();
+
+		$timeout(function() {
+
+			Self.$Errors.hide();
+		}, 2000);
+	}
+
+	jQuery(function() {
+
+		Self.$Errors = jQuery('.poeticsoft-utils .Status');
+		Self.$Errors.hide();
+	});
+
+	return Self;
 });
         
