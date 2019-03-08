@@ -6,12 +6,14 @@
 	function() {
 
 		function controller(
+      $rootScope,
       $scope, 
       $timeout,
       $element,
-      Errors, 
+      Notifications,
       Products, 
       Categories, 
+      Images,
       $window, 
       $http
     ) {
@@ -52,6 +54,22 @@
         }
       }
 
+      // Reload products
+
+      function revert() {        
+
+        $rootScope.$broadcast('opendialog', {
+          Title: 'Revert from WordPress..'
+        });
+        $rootScope.$emit('notifydialog', 'Loading...');
+
+        Products.RemoteDS.read()
+        .then(function() {
+
+          $rootScope.$emit('closedialog');
+        });
+      }
+
       // Render categories field with names
       
       $scope.getCategories = function(DataItem) {
@@ -68,7 +86,14 @@
           return Text;
         })
         .join(' - ');
-      }     
+      }    
+      
+      $scope.getProductImages = function(SKU) {
+
+        return '';
+
+        return Images.ImageGroups[SKU] ? Images.ImageGroups[SKU].count : '';
+      }
 
       /* Columns config */
 
@@ -85,20 +110,30 @@
         },
         {
           field: 'category_ids',
-          title: 'Categorias',
+          title: 'Categories',
           template: '{{ getCategories(dataItem) }}',
-          editor: editCategories,
+          // editor: editCategories,
           width: 200,
           attributes: { class: 'Editable {{ dataItem.type }}' }
         },
+        /*
         {
           field: 'image_id',
           title: 'Imagen',
           width: 90
         },
+        */
+        { 
+          title: 'Images',
+          template: '<div class="k-icon">{{ getProductImages(dataItem.sku) }}</div>',
+          width: '65px',
+          attributes: {
+            class: 'Images'
+          }
+        },
         {
           field: 'price',
-          title: 'Precio',
+          title: 'Price',
           width: 90
         },
         {
@@ -112,24 +147,29 @@
         dataSource: Products.DS,
         sortable: true,
         editable: 'incell',
+        resizable: true,
         beforeEdit: beforeEdit,
         cellClose: cellClose,
         collapse: function(e) {
           
           e.preventDefault();
         },
-        autoBind: false,
         columns: Columns,
         pageable: {
           pageSize: 20,
           pageSizes: [20, 50, 'All']
         },
         toolbar: [
+          {
+            name: 'reload',
+            text: 'Reload',
+            click: revert
+          },
           'excel',
           'pdf',
           {
             name: 'save',
-            text: 'Guardar todo',
+            text: 'Save',
             click: function(){
 
               Products.DS.sync();
@@ -149,16 +189,12 @@
 
       $scope.$on('showproductsgrid', function(event) {
 
-        $scope.$apply(function() {
-            
-          $scope.TreeListReady = true;
+        $scope.TreeListReady = true;
 
-          $timeout(function() {
+        $timeout(function() {
 
-            var ProductKendoTreeList = $($element).find('#ProductKendoTreeList').data('kendoTreeList');
-            ProductKendoTreeList.refresh();
-          });
-        });
+          var ProductKendoTreeList = $($element).find('#ProductKendoTreeList').data('kendoTreeList');
+        }, 0);
       });
 		}
 

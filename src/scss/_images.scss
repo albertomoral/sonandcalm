@@ -1,0 +1,106 @@
+    
+
+
+.poeticsoft-utils {
+	
+	.poeticsoft-utils-images {
+
+		padding: 5px 5px 7px;
+
+		.Images {
+
+			display: flex;
+			height: 100%;
+
+			/* UPLOAD IMAGES --------------------------------------------------------------------- */
+		
+			.Upload {
+
+				width: 35%;
+				position: relative;
+				padding-right: 5px;
+
+				.UploadImageTools { 
+
+					position: absolute;
+					right: 10px;
+					top: 5px;
+					z-index: 1;
+				}
+			
+				.k-upload { 
+
+					height: 100%;
+					position:relative;
+
+					.k-dropzone {
+
+						padding: 5px;
+
+						.k-upload-status {
+
+							margin-left: 0;
+						}
+					}
+					
+					.k-upload-files {                
+
+						height: calc(100% - 42px);
+						overflow-y: scroll;
+						padding-bottom: 0;
+						margin-bottom: 5px;
+					}
+					
+					.k-button.k-clear-selected,
+					.k-button.k-upload-selected {                
+
+						border-top: solid #dbdbdb 1px;
+					} 
+					
+					.k-upload-button {
+						
+						margin-right: 5px;
+					}
+				}
+			} 
+
+			/* IMAGES --------------------------------------------------------------------- */
+			
+			.List {
+				
+				width: 65%;
+
+				.k-grid {
+
+					.k-header {
+
+						padding: 5px;
+
+						button {
+
+							margin: 0;
+						}
+					}
+
+					.k-grid-content {
+
+						td.Product {
+
+							text-align: center;
+
+							.k-icon.k-i-check-circle {
+
+								color: #00c500;
+							}
+
+							.k-icon.k-i-close-circle {
+
+								color: #c50000;
+							}
+						}
+					}
+				}
+			}
+		} 
+	}
+}  

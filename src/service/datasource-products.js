@@ -5,30 +5,12 @@ function (
 	$q, 
 	$rootScope, 
 	$timeout, 
-	Errors
+	Notifications
 ) {
 
 	var Self = {};
 
 	Self.RemoteData = [];
-
-	Self.RemoteDS = new kendo.data.DataSource({	
-		transport: {
-			read: {
-				url: '/wp-json/poeticsoft/woo-products-read',
-				type: 'GET',
-				dataType: 'json' 
-			}
-		},
-		schema: {
-			data: 'Data'
-		},
-		requestEnd: function(E) {
-
-			Self.RemoteData = E.response.Data;
-			Self.DS.read({ data: Self.RemoteData });
-		}
-	});
 
 	Self.DS = new kendo.data.TreeListDataSource ({
 		batch: true,
@@ -73,8 +55,31 @@ function (
 				},
 				expanded: true
 			}
+		},
+		requestEnd: function(E) {
+			
+			$rootScope.$broadcast('showproductsgrid');
 		}
 	});
+
+	Self.RemoteDS = new kendo.data.DataSource({	
+		transport: {
+			read: {
+				url: '/wp-json/poeticsoft/woo-products-read',
+				type: 'GET',
+				dataType: 'json' 
+			}
+		},
+		schema: {
+			data: 'Data'
+		},
+		requestEnd: function(E) {
+
+			Self.RemoteData = E.response.Data;
+			Self.DS.read({ data: Self.RemoteData });
+		}
+	});
+	Self.RemoteDS.read();
 
 	return Self;
 });

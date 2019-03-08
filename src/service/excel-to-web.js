@@ -5,16 +5,24 @@ function (
 		$rootScope,
 		$q, 
 		$timeout, 
-		Errors, 
+		Notifications, 
 		Utils, 
-		Products,
-		Data
+		Products
 ) {
 	
 	var Self = {};
 
 	Self.BlockCodes = {};
 	Self.Families = {};
+	Self.FamiliesDS = new kendo.data.DataSource({
+		schema: {
+			model: {
+				id: 'name',
+				fields: {
+					'name': { type: 'string', editable: false }
+				}
+			}
+		}});
 
 	function digestRows(Rows) {
 
@@ -47,7 +55,7 @@ function (
 				}
 			});
 
-			RowData.SKU = RowData['codigo_barras_5'].Value;
+			RowData.SKU = RowData['codigo_barras_6'].Value;
 			if(RowData.SKU.trim() != '') {
 
 				var Code = RowData.SKU.split(',').join('.').split('.');
@@ -84,7 +92,17 @@ function (
 			Self.BlockCodes[BC].Size = Object.keys(Self.BlockCodes[BC].Size);
 		});
 
-		Self.Families = Object.keys(Self.Families);
+		Self.FamiliesDS.data(
+			Object
+			.keys(Self.Families)
+			.map(function(F) {
+
+				return { 
+					family: F,
+					categories: [] 
+				};
+			})
+		);
 
 		return RowsData;
 	}
@@ -99,8 +117,8 @@ function (
 			name: Product.producto_1.Value,
 			category_ids: [],
 			image_id: '',
-			price: Product.precio_coste_7.Value,
-			sale_price: Product.precio_general_14.Value,
+			price: Product.precio_coste_8.Value,
+			sale_price: Product.precio_general_15.Value,
 			stock_quantity: 0
 		};
 	}
@@ -160,12 +178,15 @@ function (
 
 		var $Q = $q.defer();
 
+		$rootScope.$broadcast('opendialog', {
+			Title: 'Excel to Web Products'
+		});
 		$rootScope.$emit('notifydialog', 'Converting Excel format');
 
 		$timeout(function() {
 
 			var ExcelProducts = digestRows(Rows)
-			.map(mapProduct);			
+			.map(mapProduct);	
 
 			$rootScope.$emit('notifydialog', 'Updating web products');
 
@@ -185,6 +206,8 @@ function (
 						$rootScope.$emit('closedialog');
 						$rootScope.$broadcast('showproductsgrid');
 
+						$Q.resolve();
+
 					}, 200);
 
 				}, 200);
@@ -195,33 +218,6 @@ function (
 
 		return $Q.promise;
 	};
-
-	/* DEBUG wit fake data from Data.ExcelProducts */
-
-	var DebugFirstTime = true;
-
-	function debugMerge() {
-
-		$rootScope.$broadcast('hideproductsgrid');		
-		$rootScope.$broadcast('opendialog', {
-			Title: 'Excel to Web Products'
-		});
-		$rootScope.$broadcast('notifydialog', 'Loading Excel data...');
-
-		$timeout(function() {
-
-			Self.mergeProducts(Data.ExcelProducts);
-		}, 1000);
-	}
-
-	Products.RemoteDS.bind('requestEnd', function() {
-
-		if(DebugFirstTime) {
-
-			$timeout(debugMerge, 1000);
-			DebugFirstTime = false;
-		}
-	});
 
   return Self;
 });

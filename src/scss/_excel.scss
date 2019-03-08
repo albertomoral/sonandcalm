@@ -1,0 +1,162 @@
+
+/* EXCEL --------------------------------------------------------------------- */   
+
+.poeticsoft-utils { 
+	
+	.poeticsoft-utils-excel {
+
+		.SpreadsheetTools { 
+
+			position: absolute;
+			top: 5px;
+			right: 5px;
+			left: 5px;
+			display: flex;
+			
+			.k-widget {
+
+				display: flex;
+				align-items: center;
+				
+				> button {
+
+					display: none;
+				}
+			
+				&.k-upload {
+
+					width: calc(100% - 200px);
+					
+					.k-button {
+
+						margin: 5px;
+					}
+					
+					.k-file-extension-wrapper {
+	
+						width: 26px;
+						height: 26px;
+					}
+					
+					.k-file-name-size-wrapper {
+	
+						font-size: 90%;
+					}
+				}
+				
+				.k-dropzone {
+
+					width: 135px;
+					padding: 5px;
+
+					.k-upload-button {
+
+						margin-right: 0;
+					}
+				}
+				
+				.k-upload-files {
+
+					border: none;
+					padding: 0;
+					line-height: 100%;
+					width: calc(100% - 135px);
+					
+					.k-file  {
+
+						border: none;
+						padding: 0 0;
+						
+						.k-upload-status {
+
+							top: 2px;  
+							right: 6px;
+						}
+					}
+				}
+			}
+			
+			.Actions {
+
+				width: 200px;
+				display: flex;
+				align-items: center;
+				justify-content: flex-end;
+				
+				button.Attributes {
+
+					margin-right: 10px;
+				}
+			}
+		}
+		
+		.SpreadsheetView { 
+
+			position: absolute;
+			top: 53px;
+			right: 7px;
+			bottom: 6px;
+			left: 5px;
+			
+			.k-spreadsheet {
+
+				width: 100%;
+				height: 100%;
+
+				.k-spreadsheet-action-bar,
+				.k-spreadsheet-quick-access-toolbar,
+				.k-spreadsheet-sheets-bar-add {
+
+					display: none;
+				}
+
+				.k-spreadsheet-view {
+
+					height: calc(100% - 42px) !important;
+					overflow: auto;
+				}
+
+				.k-spreadsheet-column-header {
+
+					border-style: solid;
+					border-width: 0 0 1px 0;
+
+					> div {
+
+						border-style: solid;
+						border-width: 0 1px 0 0;
+						border-color: #ccc;
+					}
+				}
+
+				.k-spreadsheet-row-header {
+
+					border-style: solid;
+					border-width: 0 1px 0 0;
+
+					> div {
+
+						border-style: solid;
+						border-width: 0 0 1px 0;
+						border-color: #ccc;
+						box-sizing: border-box;
+					}
+				}
+
+				.k-tabstrip-items {
+
+					padding: 1px 20px 0;
+				}
+	
+				/*
+	
+				.k-spreadsheet-message-content {
+
+					margin: 0 20px;
+				}
+
+				*/
+			}
+		}
+	}
+}

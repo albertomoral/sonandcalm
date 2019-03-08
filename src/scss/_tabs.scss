@@ -1,0 +1,36 @@
+    
+.poeticsoft-utils {
+
+	.k-tabstrip-wrapper { 
+
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		
+		.k-tabstrip { 
+
+			position: absolute;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			
+			.k-tabstrip-items{ 
+
+				padding: 5px 20px 0;
+			}
+		}
+		
+		.k-content {         
+
+			position: absolute;
+			top: 41px;
+			right: 0;
+			bottom: 0;
+			left: 0;
+			overflow: hidden !important;
+		}
+	}
+}

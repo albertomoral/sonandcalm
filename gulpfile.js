@@ -2,23 +2,32 @@
 	var gulp = require('gulp');
 	var livereload = require('gulp-livereload');
 	var concat = require('gulp-concat');
+  var sass = require('gulp-sass');
+	var autoprefixer = require('gulp-autoprefixer');
+	var rename = require('gulp-rename');
 
 	/* ------------------------------------------------------------------------------------------
 	   SONANDCALM
 	*/
 
-	gulp.task('compile_sonandcalm', function() {
+	/* styles */
+
+	gulp.task('compile_scss', function() {
+
+		return gulp.src('./src/scss/main.scss')
+				   .pipe(sass().on('error', sass.logError))
+				   .pipe(autoprefixer())
+				   .pipe(rename('style.css'))
+				   .pipe(gulp.dest('./src/'));
+	});
+
+	gulp.task('compile_sonandcalm', ['compile_scss'], function() {
 
 		gulp.src([
 			'../bower_components/kendo-ui/styles/kendo.common.min.css',
 			'../bower_components/kendo-ui/styles/kendo.metro.min.css',
 			'../bower_components/kendo-ui/styles/kendo.metro.mobile.min.css',
-			'./src/css/app.css',
-			'./src/css/excel.css',
-			'./src/css/images.css',
-			'./src/css/products.css',
-			'./src/css/upload-images.css',
-			'./src/css/utils.css'
+			'./src/style.css'
 		])
 		.pipe(concat('utils.css'))
 		.pipe(gulp.dest('./dist/'));		
@@ -32,20 +41,23 @@
 			'../bower_components/kendo-ui/js/angular.min.js',
 			'../bower_components/kendo-ui/js/kendo.all.min.js',
 			'../bower_components/jszip/dist/jszip.min.js',
+
 			'./src/module.js',
+
 			'./src/service/datasource-categories.js',
 			'./src/service/datasource-products.js',
-			'./src/service/datasource-images.js',
+			'./src/service/datasource-images.js',			
 			'./src/service/excel-to-web.js',
-			'./src/service/errors.js',
+			'./src/service/notifications.js',
 			'./src/service/utils.js',
-			'./src/service/data.js',
+
+			'./src/directive/utils.js',
 			'./src/directive/dialog.js',
 			'./src/directive/excel.js',
 			'./src/directive/products.js',
+			'./src/directive/categories.js',
 			'./src/directive/images.js',
-			'./src/directive/upload.js',
-			'./src/directive/utils.js',
+
 			'./src/app.js'
 		])
 		.pipe(concat('utils.js'))

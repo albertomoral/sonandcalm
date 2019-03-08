@@ -1,0 +1,262 @@
+.poeticsoft-utils {
+  position: relative;
+  /* margin-left: -20px;        */ }
+  .poeticsoft-utils .Notifications {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    min-height: 20px;
+    text-align: right;
+    background-color: #fefefe;
+    border: 1px solid #ccc;
+    box-shadow: 0 0 12px #00000066; }
+    .poeticsoft-utils .Notifications.Error {
+      color: #cc1800; }
+
+.poeticsoft-utils .k-tabstrip-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0; }
+  .poeticsoft-utils .k-tabstrip-wrapper .k-tabstrip {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0; }
+    .poeticsoft-utils .k-tabstrip-wrapper .k-tabstrip .k-tabstrip-items {
+      padding: 5px 20px 0; }
+  .poeticsoft-utils .k-tabstrip-wrapper .k-content {
+    position: absolute;
+    top: 41px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    overflow: hidden !important; }
+
+/* EXCEL --------------------------------------------------------------------- */
+.poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  left: 5px;
+  display: flex; }
+  .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-widget {
+    display: flex;
+    align-items: center; }
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-widget > button {
+      display: none; }
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-widget.k-upload {
+      width: calc(100% - 200px); }
+      .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-widget.k-upload .k-button {
+        margin: 5px; }
+      .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-widget.k-upload .k-file-extension-wrapper {
+        width: 26px;
+        height: 26px; }
+      .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-widget.k-upload .k-file-name-size-wrapper {
+        font-size: 90%; }
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-widget .k-dropzone {
+      width: 135px;
+      padding: 5px; }
+      .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-widget .k-dropzone .k-upload-button {
+        margin-right: 0; }
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-widget .k-upload-files {
+      border: none;
+      padding: 0;
+      line-height: 100%;
+      width: calc(100% - 135px); }
+      .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-widget .k-upload-files .k-file {
+        border: none;
+        padding: 0 0; }
+        .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .k-widget .k-upload-files .k-file .k-upload-status {
+          top: 2px;
+          right: 6px; }
+  .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .Actions {
+    width: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; }
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetTools .Actions button.Attributes {
+      margin-right: 10px; }
+
+.poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetView {
+  position: absolute;
+  top: 53px;
+  right: 7px;
+  bottom: 6px;
+  left: 5px; }
+  .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetView .k-spreadsheet {
+    width: 100%;
+    height: 100%;
+    /*
+	
+				.k-spreadsheet-message-content {
+
+					margin: 0 20px;
+				}
+
+				*/ }
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetView .k-spreadsheet .k-spreadsheet-action-bar,
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetView .k-spreadsheet .k-spreadsheet-quick-access-toolbar,
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetView .k-spreadsheet .k-spreadsheet-sheets-bar-add {
+      display: none; }
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetView .k-spreadsheet .k-spreadsheet-view {
+      height: calc(100% - 42px) !important;
+      overflow: auto; }
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetView .k-spreadsheet .k-spreadsheet-column-header {
+      border-style: solid;
+      border-width: 0 0 1px 0; }
+      .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetView .k-spreadsheet .k-spreadsheet-column-header > div {
+        border-style: solid;
+        border-width: 0 1px 0 0;
+        border-color: #ccc; }
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetView .k-spreadsheet .k-spreadsheet-row-header {
+      border-style: solid;
+      border-width: 0 1px 0 0; }
+      .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetView .k-spreadsheet .k-spreadsheet-row-header > div {
+        border-style: solid;
+        border-width: 0 0 1px 0;
+        border-color: #ccc;
+        box-sizing: border-box; }
+    .poeticsoft-utils .poeticsoft-utils-excel .SpreadsheetView .k-spreadsheet .k-tabstrip-items {
+      padding: 1px 20px 0; }
+
+/* PRODUCTS --------------------------------------------------------------------- */
+.poeticsoft-utils .poeticsoft-utils-products .WebProductsView {
+  position: absolute;
+  top: 8px;
+  right: 6px;
+  bottom: 8px;
+  left: 6px; }
+  .poeticsoft-utils .poeticsoft-utils-products .WebProductsView .k-loading-mask {
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    background-color: #fff; }
+  .poeticsoft-utils .poeticsoft-utils-products .WebProductsView .k-treelist {
+    height: 100%; }
+    .poeticsoft-utils .poeticsoft-utils-products .WebProductsView .k-treelist .k-header {
+      /* text-align: right; */
+      padding: 5px; }
+    .poeticsoft-utils .poeticsoft-utils-products .WebProductsView .k-treelist .k-grid-content {
+      height: calc(100% - 114px) !important; }
+      .poeticsoft-utils .poeticsoft-utils-products .WebProductsView .k-treelist .k-grid-content .k-icon.k-i-collapse {
+        margin: -2px 2px 0 0; }
+        .poeticsoft-utils .poeticsoft-utils-products .WebProductsView .k-treelist .k-grid-content .k-icon.k-i-collapse:before {
+          content: "\e525"; }
+      .poeticsoft-utils .poeticsoft-utils-products .WebProductsView .k-treelist .k-grid-content td.Images {
+        text-align: center; }
+        .poeticsoft-utils .poeticsoft-utils-products .WebProductsView .k-treelist .k-grid-content td.Images div:empty:before {
+          content: "\e11d";
+          color: #c50000; }
+        .poeticsoft-utils .poeticsoft-utils-products .WebProductsView .k-treelist .k-grid-content td.Images div:not(:empty) {
+          text-indent: 0;
+          font: inherit;
+          width: auto;
+          height: auto; }
+  .poeticsoft-utils .poeticsoft-utils-products .WebProductsView td.Editable.Variable,
+  .poeticsoft-utils .poeticsoft-utils-products .WebProductsView td.Editable.Simple {
+    background-color: #eff5dc66;
+    cursor: pointer; }
+
+.poeticsoft-utils .poeticsoft-utils-categories {
+  padding: 10px;
+  /* HEAD */
+  /* VIEWS */
+  /* FOOTER */ }
+  .poeticsoft-utils .poeticsoft-utils-categories .Head {
+    display: flex;
+    justify-content: space-between; }
+    .poeticsoft-utils .poeticsoft-utils-categories .Head .HeadWeb,
+    .poeticsoft-utils .poeticsoft-utils-categories .Head .HeadFamilies {
+      padding: 0 0 5px; }
+    .poeticsoft-utils .poeticsoft-utils-categories .Head .HeadWeb {
+      width: calc(50% - 70px);
+      border: solid #ccc;
+      border-width: 0 0 1px; }
+    .poeticsoft-utils .poeticsoft-utils-categories .Head .HeadFamilies {
+      width: calc(50% - 70px);
+      border: solid #ccc;
+      border-width: 0 0 1px; }
+  .poeticsoft-utils .poeticsoft-utils-categories .Views {
+    display: flex;
+    position: absolute;
+    top: 60px;
+    right: 14px;
+    bottom: 52px;
+    left: 10px;
+    /* CATEGORIES */
+    /* TOOLS */
+    /* FAMILIES */ }
+    .poeticsoft-utils .poeticsoft-utils-categories .Views .CategoriesTreeView {
+      width: calc(50% - 70px); }
+    .poeticsoft-utils .poeticsoft-utils-categories .Views .CategoriesTreeView .TreeViewItem {
+      padding: 5px 10px;
+      cursor: pointer; }
+    .poeticsoft-utils .poeticsoft-utils-categories .Views .Tools {
+      width: 140px;
+      text-align: center; }
+    .poeticsoft-utils .poeticsoft-utils-categories .Views .FamiliesListView {
+      width: calc(50% - 70px);
+      overflow: auto; }
+      .poeticsoft-utils .poeticsoft-utils-categories .Views .FamiliesListView .ListViewItem {
+        padding: 5px 10px;
+        margin: 5px;
+        border: solid #ccc 1px;
+        cursor: pointer; }
+      .poeticsoft-utils .poeticsoft-utils-categories .Views .FamiliesListView.Belongs {
+        background-color: #ff0; }
+  .poeticsoft-utils .poeticsoft-utils-categories .Footer {
+    position: absolute;
+    right: 14px;
+    bottom: 10px;
+    left: 10px; }
+
+.poeticsoft-utils .poeticsoft-utils-images {
+  padding: 5px 5px 7px; }
+  .poeticsoft-utils .poeticsoft-utils-images .Images {
+    display: flex;
+    height: 100%;
+    /* UPLOAD IMAGES --------------------------------------------------------------------- */
+    /* IMAGES --------------------------------------------------------------------- */ }
+    .poeticsoft-utils .poeticsoft-utils-images .Images .Upload {
+      width: 35%;
+      position: relative;
+      padding-right: 5px; }
+      .poeticsoft-utils .poeticsoft-utils-images .Images .Upload .UploadImageTools {
+        position: absolute;
+        right: 10px;
+        top: 5px;
+        z-index: 1; }
+      .poeticsoft-utils .poeticsoft-utils-images .Images .Upload .k-upload {
+        height: 100%;
+        position: relative; }
+        .poeticsoft-utils .poeticsoft-utils-images .Images .Upload .k-upload .k-dropzone {
+          padding: 5px; }
+          .poeticsoft-utils .poeticsoft-utils-images .Images .Upload .k-upload .k-dropzone .k-upload-status {
+            margin-left: 0; }
+        .poeticsoft-utils .poeticsoft-utils-images .Images .Upload .k-upload .k-upload-files {
+          height: calc(100% - 42px);
+          overflow-y: scroll;
+          padding-bottom: 0;
+          margin-bottom: 5px; }
+        .poeticsoft-utils .poeticsoft-utils-images .Images .Upload .k-upload .k-button.k-clear-selected,
+        .poeticsoft-utils .poeticsoft-utils-images .Images .Upload .k-upload .k-button.k-upload-selected {
+          border-top: solid #dbdbdb 1px; }
+        .poeticsoft-utils .poeticsoft-utils-images .Images .Upload .k-upload .k-upload-button {
+          margin-right: 5px; }
+    .poeticsoft-utils .poeticsoft-utils-images .Images .List {
+      width: 65%; }
+      .poeticsoft-utils .poeticsoft-utils-images .Images .List .k-grid .k-header {
+        padding: 5px; }
+        .poeticsoft-utils .poeticsoft-utils-images .Images .List .k-grid .k-header button {
+          margin: 0; }
+      .poeticsoft-utils .poeticsoft-utils-images .Images .List .k-grid .k-grid-content td.Product {
+        text-align: center; }
+        .poeticsoft-utils .poeticsoft-utils-images .Images .List .k-grid .k-grid-content td.Product .k-icon.k-i-check-circle {
+          color: #00c500; }
+        .poeticsoft-utils .poeticsoft-utils-images .Images .List .k-grid .k-grid-content td.Product .k-icon.k-i-close-circle {
+          color: #c50000; }

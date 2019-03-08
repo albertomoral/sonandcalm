@@ -1,0 +1,100 @@
+
+.poeticsoft-utils {
+	
+	.poeticsoft-utils-categories {
+
+		padding: 10px;
+
+		/* HEAD */
+
+		.Head {
+
+			display: flex;
+			justify-content: space-between;
+
+			.HeadWeb,
+			.HeadFamilies {
+
+				padding: 0 0 5px;
+			}
+			
+			.HeadWeb {
+
+				width: calc(50% - 70px);
+				border: solid #ccc;	
+				border-width: 0 0 1px;
+			}
+			
+			.HeadFamilies {
+
+				width: calc(50% - 70px);
+				border: solid #ccc;	
+				border-width: 0 0 1px;
+			}
+		}
+
+		/* VIEWS */
+
+		.Views {
+
+			display: flex;
+			position: absolute;
+			top: 60px;
+			right: 14px;
+			bottom: 52px;
+			left: 10px;
+
+			/* CATEGORIES */
+
+			.CategoriesTreeView {
+
+				width: calc(50% - 70px);
+			}
+			
+			.CategoriesTreeView .TreeViewItem {
+
+				padding: 5px 10px;	
+				cursor: pointer;
+			}
+
+			/* TOOLS */
+
+			.Tools {
+
+				width: 140px;
+				text-align: center;
+			}
+
+			/* FAMILIES */
+
+			.FamiliesListView {
+
+				width: calc(50% - 70px);
+				overflow: auto;
+				
+				.ListViewItem {
+
+					padding: 5px 10px;
+					margin: 5px;
+					border: solid #ccc 1px;	
+					cursor: pointer;
+				}
+				
+				&.Belongs {
+
+					background-color: #ff0;
+				}
+			}
+		}
+
+		/* FOOTER */ 
+
+		.Footer {
+
+			position: absolute;
+			right: 14px;
+			bottom: 10px;
+			left: 10px;
+		}
+	}
+}
