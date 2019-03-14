@@ -1,9 +1,16 @@
+/* dialog.js */
 
-  APP.directive(
-    'poeticsoftUtilsDialog', 
+APP.directive(
+    'poeticsoftWooAgoraDialog', 
   function() {
 
-    function controller($scope, $rootScope, $timeout, ExcelToWeb) {
+    function controller(
+			$scope, 
+			$rootScope, 
+			$timeout, 
+			ExcelToWeb,
+			$document
+		) {
 
 			var Buttons = {
 				Pause: null,
@@ -11,12 +18,15 @@
 				Cancel: null
 			};
 
+			var cancelAction = function() { console.log('No cancel function'); }
+			function cancel() { return cancelAction(); }
+
 			$scope.KendoDialogOptions = {
 				title: 'Dialog',
 				width: '450',
 				closable: false,
-				/*
 				actions: [
+					/*
 					{ 
 						text: 'Pause',
 						action: function() {
@@ -37,16 +47,12 @@
 							return false;
 						}
 					},
+				*/
 					{ 
 						text: 'Cancel',
-						action: function() {
-							
-							ExcelToWeb.cancelProcess();
-							return false;
-						}
+						action: cancel
 					}
 				],
-				*/
 				modal: true,
 				visible: false,
 				open: function(E) {
@@ -63,13 +69,33 @@
 			
 			$rootScope.$on('opendialog', function($event, Data) {
 
+				var $ButtonGroup = $($document).find('.k-window.k-dialog .k-dialog-buttongroup');
+
+				if(Data.cancel) {
+
+					$ButtonGroup.addClass('CanCancel');
+					cancelAction = Data.cancel;
+
+				} else {
+
+					$ButtonGroup.removeClass('CanCancel');
+				}
+
 				$scope.KendoDialog.title(Data.Title);
 				$scope.KendoDialog.open();
 			});
 
-			$rootScope.$on('notifydialog', function($event, Text) {	
+			$rootScope.$on('notifydialog', function($event, Data) {	
 
-				$scope.KendoDialog.content(Text);
+				$scope.KendoDialog.content(Data.text || '...');				
+
+				if(Data.close) {
+					
+					var $ButtonGroup = $($document).find('.k-window.k-dialog .k-dialog-buttongroup');
+
+					$ButtonGroup.addClass('CanCancel');
+					cancelAction = Data.close;
+				}
 			});	
 			
 			$rootScope.$on('closedialog', function($event, Data) {

@@ -1,6 +1,6 @@
+/* app.js */
 
+jQuery(function() {
 
-	jQuery(function() {
-	
-		angular.bootstrap(document, ['APP']);
-	});
+	angular.bootstrap(document, ['APP']);
+});

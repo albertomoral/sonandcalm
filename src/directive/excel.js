@@ -1,6 +1,7 @@
+/* excel.js */
 
-	APP.directive(
-		'poeticsoftUtilsExcel', 
+APP.directive(
+		'poeticsoftWooAgoraExcel', 
 	function() {
 
 		function controller(
@@ -10,6 +11,8 @@
 			$timeout,
 			$window,
 			Notifications,
+			Products,
+			ColorSize,
 			ExcelToWeb
 		) {
 			
@@ -37,18 +40,25 @@
 			}
 
 			var ProductsSheet;
-			var FootPrint;
 			var RowCount;
+			var CanProcess = true;
 
-			function sheetLoaded() {				
+			function sheetLoaded() {
+				
+				CanProcess = true;
 
 				$rootScope.$broadcast('opendialog', {
-					Title: 'Excel data process'
+					Title: 'Excel data process',
+					cancel: function() {
+
+						CanProcess = false;
+						return false;
+					}
 				});
 
 				// There is a sheet "Products"
 
-				$rootScope.$emit('notifydialog', 'Searching Products sheet...');
+				$rootScope.$emit('notifydialog', { text: 'Searching Products sheet...' });
 
 				ProductsSheet = $scope.AgoraKendoSpreadsheet.sheetByName('Productos');
 				if(!ProductsSheet) {
@@ -59,55 +69,60 @@
 
 				// Fields secuence validation
 
-				$rootScope.$emit('notifydialog', 'Validating sheet...');
+				$rootScope.$emit('notifydialog', { text: 'Validating sheet...' });
 
-				$http.get('/wp-json/poeticsoft/get-agora-fields-footprint')
-				.then(
-					function(Response) {
-
-						if(Response.data.Status.Code == 'KO') {						
-					
-							$rootScope.$emit('closedialog');
-							return Notifications.show({ errors: Response.data.Status.Reason });
-						}
-
-						FootPrint = Response.data.Data;
-						RowCount = ProductsSheet._rows._count - 1;
+				RowCount = ProductsSheet._rows._count;
 						
-						var Selection = ProductsSheet.range('A1:' + FootPrint.ForTree[0] + RowCount).select();
-						var FieldsRow = Selection.values()[0];
-						var FieldsFootPrint = FieldsRow.join('|');
-						ProductsSheet.range('A2:' + FootPrint.ForTree[0] + RowCount).sort(FootPrint.ForTree[3]);
-						ProductsSheet.range('A1:A1').select();
+				var FieldsRow = ProductsSheet.range(
+					'A1:' + Products.FootPrint.ForTree.MaxCellIndex + 1
+				).values()[0];
+				var FieldsFootPrint = FieldsRow.join('|');
 
-						if(FieldsFootPrint == FootPrint.FootPrint) {
+				if(FieldsFootPrint == Products.FootPrint.FieldHash) {
 
-							$rootScope.$emit('notifydialog', 'Sheet valid, processing...');
-							$timeout(processSheet, 100);
+					$rootScope.$emit('notifydialog', { text: 'Sheet valid, processsing...' });
+					$timeout(processSheet, 200);
 
-						} else {
-					
-							$rootScope.$emit('closedialog');
-							return Notifications.show(
-								{ 
-									errors: 'Error, Products sheet doesn\'t have appropiate fields structure, get another file.'
-								},
-								true,
-								4000
-							);
-						}
-					}
-				);
+				} else {
+			
+					$rootScope.$emit('closedialog');
+					return Notifications.show(
+						{ 
+							errors: 'Error, Products sheet doesn\'t have appropiate fields structure, get another file.'
+						},
+						true,
+						4000
+					);
+				}
 			}
 
 			function processSheet() {
 
-				$rootScope.$emit('notifydialog', 'Creating product tree...');
+				$rootScope.$emit('notifydialog', { text: 'Creating variations, color and sizes...' });
 
-				ProductsSheet.insertColumn(2);
-				ProductsSheet.columnWidth(2, 170);
-				var HeadCell = ProductsSheet.range(FootPrint.ForTree[1] + 1);
-				HeadCell.value('Parent');
+				ProductsSheet.range(
+					'A2:' + 
+					Products.FootPrint.ForTree.MaxCellIndex + 
+					RowCount
+				).sort(Products.FootPrint.ForTree.InsertParentIndex);
+
+				ProductsSheet.insertColumn(Products.FootPrint.ForTree.InsertParentIndex);
+				ProductsSheet.columnWidth(Products.FootPrint.ForTree.InsertParentIndex, 170);
+				ProductsSheet.insertColumn(Products.FootPrint.ForTree.InsertColorSizeIndex);
+				ProductsSheet.columnWidth(Products.FootPrint.ForTree.InsertColorSizeIndex, 170);
+				ProductsSheet.insertColumn(Products.FootPrint.ForTree.InsertColorSizeIndex);
+				ProductsSheet.columnWidth(Products.FootPrint.ForTree.InsertColorSizeIndex, 170);
+
+				ProductsSheet.range(Products.FootPrint.ForTree.ParentCellIndex + 1).value('Parent');
+				ProductsSheet.range(Products.FootPrint.ForTree.ColorCellIndex + 1).value('Color');
+				ProductsSheet.range(Products.FootPrint.ForTree.SizeCellIndex + 1).value('Size');
+
+				Products.FootPrint.NoEdit.split('')
+				.forEach(function(ColumnIndex) {
+
+					var Range = ColumnIndex + '2:' + ColumnIndex + RowCount;
+					ProductsSheet.range(Range).enable(false)
+				});
 
 				var SKUParentCode = '';
 				var SKUParent = '';
@@ -116,14 +131,16 @@
 
 				function parseRow() {
 
-					var ParentRangeIndex = FootPrint.ForTree[1] + (I+1);
-					var ParentCell = ProductsSheet.range(ParentRangeIndex);
-					var SKURangeIndex = FootPrint.ForTree[2] + (I+1);
-					var SKU = ProductsSheet.range(SKURangeIndex).value();
+					var ParentCell = ProductsSheet.range(Products.FootPrint.ForTree.ParentCellIndex + (I+1));
+					var SKUCell = ProductsSheet.range(Products.FootPrint.ForTree.SKUCellAfterInsertIndex + (I+1));
+					var SKU = SKUCell.value();
 
 					if($.trim(SKU) != '') {
 
-						var Code = SKU.split(',').join('.').split('.');
+						SKU = SKU.split(',').join('.');
+						SKUCell.value(SKU);
+
+						var Code = SKU.split('.');
 						var ParentCode = Code[0] + '.' + Code[1] + '.' + Code[2];
 
 						if(ParentCode != SKUParentCode) { 
@@ -134,30 +151,94 @@
 						}
 
 						ParentCell.value(SKUParent);
-						var ProductColor = AlternateProduct ? '#dfdfdf' : '#ffffff';
-						ProductsSheet.range('A' + (I+1) + ':' + FootPrint.ForTree[0] + (I+1)).background(ProductColor);
+						var ProductColor = AlternateProduct ? '#efefef' : '#ffffff';
+						ProductsSheet.range(
+							'A' + (I+1) + ':' + Products.FootPrint.ForTree.SizeCellIndex + (I+1)
+						).background(ProductColor);
+
+						if(ColorSize.Data[SKU]) {
+							
+							ProductsSheet.range(
+								Products.FootPrint.ForTree.ColorCellIndex + (I+1)
+							).value(ColorSize.Data[SKU].color);
+							ProductsSheet.range(
+								Products.FootPrint.ForTree.SizeCellIndex + (I+1)
+							).value(ColorSize.Data[SKU].size);
+						}
 						
-						$rootScope.$emit('notifydialog', I + ' - ' + SKU + ' > ' + SKUParent);
+						$rootScope.$emit('notifydialog', { text: I + ' - ' + SKU + ' > ' + SKUParent });
 
 					} else {
 						
-						ProductsSheet.range('A' + (I+1) + ':' + FootPrint.ForTree[0] + (I+1)).background('#cc0000');
-						ProductsSheet.range('A' + (I+1) + ':' + FootPrint.ForTree[0] + (I+1)).color('#ffffff');
-						$rootScope.$emit('notifydialog', 'Product without SKU');
+						ProductsSheet.range(
+							'A' + (I+1) + ':' + Products.FootPrint.ForTree.SizeCellIndex + (I+1)
+						).background('#cc0000');
+						ProductsSheet.range(
+							'A' + (I+1) + ':' + Products.FootPrint.ForTree.SizeCellIndex + (I+1)
+						).color('#ffffff');
+						$rootScope.$emit('notifydialog', { text: 'Product without SKU' });
 					}
 
 					I++;
 
 					if(I<RowCount + 1) {
 
-						return $timeout(parseRow, 0);
+						if(CanProcess) {
+
+							return $timeout(parseRow, 0);
+
+						} else {
+		
+							$rootScope.$emit(
+								'notifydialog', 
+								{ 
+									text: 'Process cancelled. Please load file again',
+									close: function() {
+
+										ProductsSheet.range(
+											'A1:' + Products.FootPrint.ForTree.SizeCellIndex + RowCount
+										).clear();
+										$rootScope.$emit('closedialog');
+									}
+								}
+							);
+
+							$timeout(function() {		
+
+								ProductsSheet.range(
+									'A1:' + Products.FootPrint.ForTree.SizeCellIndex + RowCount
+								).clear();
+								$rootScope.$emit('closedialog');
+
+							}, 5000);
+						}
 
 					} else {
 
-						$scope.allowProcessing = true;
-						$rootScope.$emit('closedialog');
+						
+						$rootScope.$emit('notifydialog', { text: 'Saving data...' });
+
+						$http.post(
+							'/wp-json/poeticsoft/woo-agora-excel-data-update',
+							ProductsSheet.toJSON()
+						)
+						.then(function(Response) {
+		
+							var Code = Response.data.Status.Code;
+							if(Code == 'OK'){
+
+								$rootScope.$emit('closedialog');
+								Notifications.show(Response.data.Status.Message);
+								$scope.allowProcessing = true;
+
+							} else {
+		
+								Notifications.show({ errors: Response.data.Status.Reason });
+							}
+						});
 					}
 				}
+
 				parseRow();
 			}
 		
@@ -173,14 +254,51 @@
 
 			$scope.generateWebProducts = function() {	
 				
-				var ProductsSheet = $scope.AgoraKendoSpreadsheet.sheetByName('Productos');
-				var Rows = ProductsSheet.toJSON().rows;
-				
 				$scope.allowProcessing = false;
+				var RowsRange = ProductsSheet.range('A2:' + Products.FootPrint.ForTree.SizeCellIndex + RowCount);					
+				ExcelToWeb.process(RowsRange)
+				.finally(function() {				
 				
-				ExcelToWeb.mergeProducts(Rows)
-				.finally(function() {}); 
+					$scope.allowProcessing = true;
+				}); 
 			}
+
+			// Load Agora Excel data
+			
+			$scope.$on("kendoWidgetCreated", function(event, widget){
+      
+        if (widget === $scope.AgoraKendoSpreadsheet) {
+
+					$http.get('/wp-json/poeticsoft/woo-agora-excel-data-read')
+					.then(function(Response) {
+
+						var Code = Response.data.Status.Code;
+						if(Code == 'OK'){ 
+
+							var ProductsSheetData = Response.data.Data;
+							delete ProductsSheetData.activeCell;
+							delete ProductsSheetData.selection;
+
+							$scope.AgoraKendoSpreadsheet.fromJSON({
+								sheets: [ProductsSheetData]
+							});				
+							
+							ProductsSheet = $scope.AgoraKendoSpreadsheet.activeSheet();
+							RowCount = ProductsSheet._rows._count;
+				
+							$scope.allowProcessing = true;
+
+							/* DEBUG */
+
+							$timeout($scope.generateWebProducts, 10);
+
+						} else {
+
+							return Notifications.show({ errors: Response.data.Status.Reason });
+						}
+					});
+				}
+			});
 		}
 
 		return {
@@ -188,7 +306,7 @@
 			replace: true,
 			scope: true,
 			controller: controller,
-			template: `<div class="poeticsoft-utils-excel">
+			template: `<div class="poeticsoft-woo-agora-excel">
 				<div class="SpreadsheetTools">
 					<input kendo-upload="AgoraKendoUpload"
 						     name="file"

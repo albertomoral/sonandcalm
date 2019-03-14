@@ -1,3 +1,4 @@
+/* datasource-categories.js */
 
 APP.factory(
 	'Categories', 
@@ -9,11 +10,12 @@ function (
 	Products
 ) {
 
-	var FirstTimeReadProducts = false;
 	var Self = {};
-	var RemoteData;
-	var LocalTree;
+	var RemoteData; // Buffer for construct tree
 
+	// Load and transform data from woo-products-categories-read
+	// a plain woocommerce categories list 
+	// for consuming into a HierarchicalDataSource
 	function constructTree(Id) {
 
 		var ID = Id || 0;
@@ -29,8 +31,6 @@ function (
 
 		return Nodes;
 	}
-
-	Self.DS = new kendo.data.HierarchicalDataSource({});
 	
 	Self.RemoteDS = new kendo.data.DataSource ({
 		transport: {
@@ -60,11 +60,15 @@ function (
 		requestEnd: function(E) {
 
 			RemoteData = E.response.Data;
-			Self.DS.data(constructTree());
+			Self.DS.data(constructTree()); // Feed Self.DS
 		}
 	});
 	Self.RemoteDS.read();	
+
+	// Data source for CategoriesTreeViewConfig in Categories directive
+	Self.DS = new kendo.data.HierarchicalDataSource({});
 	
+	// Data source for FamiliesListViewConfig in Categories directive
 	Self.RelationsDS = new kendo.data.DataSource ({
 		transport: {
 			read: {
@@ -91,6 +95,34 @@ function (
 		error: Notifications.showNotifications
 	});
 	Self.RelationsDS.read();
+
+	Self.updateFamilies = function(FamiliesList) {
+
+		// Remove inexistent families
+		var RemoveIndex = [];
+		Self.RelationsDS
+		.data()
+		.toJSON()
+		.forEach(function(Family, Index) {
+
+			if(FamiliesList.indexOf(Family.family) == -1) {
+
+				Self.RelationsDS.remove(Self.RelationsDS.get(Family.family));
+			};
+		});
+
+		// Add new families
+		FamiliesList.forEach(function(Family) {
+			var FamilyExistent = Self.RelationsDS.get(Family);
+			if(!FamilyExistent) {
+
+				Self.RelationsDS.add({
+					family: Family,
+					categories: []
+				})
+			}
+		});
+	}
 
 	return Self;
 });

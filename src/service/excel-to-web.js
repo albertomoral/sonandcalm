@@ -1,3 +1,4 @@
+/* excel-to-web.js */
 
 APP.factory(
 	'ExcelToWeb', 
@@ -5,131 +6,70 @@ function (
 		$rootScope,
 		$q, 
 		$timeout, 
-		Notifications, 
-		Utils, 
-		Products
+		Products,
+		Categories
 ) {
 	
 	var Self = {};
 
-	Self.BlockCodes = {};
-	Self.Families = {};
-	Self.FamiliesDS = new kendo.data.DataSource({
-		schema: {
-			model: {
-				id: 'name',
-				fields: {
-					'name': { type: 'string', editable: false }
-				}
-			}
-		}});
+	/* Excel rows to Product Array + Categories & SKU Code Base */
 
-	function digestRows(Rows) {
+	function digestRange(RowsRange) {
 
-		var RowsData = [];		
-		var HeaderRow = Rows.shift();
-		var Fields = HeaderRow.cells.map(function(Cell) {
+		var Families = {};
+		var ProductRows = [];
 
-			return {
-				Nick: Utils.toSlug(Cell.value + '_' + Cell.index),
-				Name: Cell.value
-			}
-		});
+		RowsRange.forEachRow(function(R, Index) {
 
-		var ParentSKU = '';
-		Rows.forEach(function(Row) {
+			var Row = {};
 
-			var RowData = {};
+			R.forEachCell(function (row, column, value) {
 
-			Fields.forEach(function(Field, Index) {
-
-				var Cell = Row.cells.find(function(C) {
-
-					return C.index == Index;
-				});
-
-				RowData[Field.Nick] = {
-					Field: Field.Name,
-					Value: (Cell && Cell.value) || '',
-					State: (Cell && Cell.background) || ''
-				}
+				Row[Products.FootPrint.FinalFields[column]] = value.value;
 			});
 
-			RowData.SKU = RowData['codigo_barras_6'].Value;
-			if(RowData.SKU.trim() != '') {
+			var SKU = $.trim(Row['Código Barras']);
+			if(SKU) {
 
-				var Code = RowData.SKU.split(',').join('.').split('.');
-				RowData.BlockCode = Code[0] + '.' + Code[1] + '.' + Code[2];
-				RowData.ParentSKU = '';
+				var Code = Row['Código Barras'].split('.');
+				Row.parentbase = Code[0] + '.' + Code[1] + '.' + Code[2];
+				Row.Type = '';
 
-				if(!Self.BlockCodes[RowData.BlockCode]) {
+				if(Row.Familia) { Families[Row.Familia] = '';	} // Dummy for unique values
 
-					RowData.IsParent = true;
-					ParentSKU = RowData.SKU;
+				ProductRows.push(Row);
+			} 
+		});
 
-					Self.BlockCodes[RowData.BlockCode] = {
-						Color: {},
-						Size: {}
-					};
-				} else {
+		Categories.updateFamilies(Object.keys(Families));
 
-					RowData.ParentSKU = ParentSKU;
-				}
+		return ProductRows;
+	}
 
-				Self.BlockCodes[RowData.BlockCode].Color[RowData['color_2'].Value] = 'color'; 	// Hack unique values
-				Self.BlockCodes[RowData.BlockCode].Size[RowData['talla_3'].Value] = 'size'; 		//
+	function updateProductCategories(Products) {
 
-				Self.Families[RowData['familia_0'].Value] = 'family';
+		return Products.map(function(Product) {
 
-				RowsData.push(RowData);
+			var Family = Product.Familia;
+			var FamilyRelations = Categories.RelationsDS.get(Family);
+			if(FamilyRelations) {
+
+				Product.Categories = FamilyRelations.categories.toJSON();
 			}
+
+			return Product;
 		});
-
-		Object.keys(Self.BlockCodes)
-		.forEach(function(BC) {
-
-			Self.BlockCodes[BC].Color = Object.keys(Self.BlockCodes[BC].Color);
-			Self.BlockCodes[BC].Size = Object.keys(Self.BlockCodes[BC].Size);
-		});
-
-		Self.FamiliesDS.data(
-			Object
-			.keys(Self.Families)
-			.map(function(F) {
-
-				return { 
-					family: F,
-					categories: [] 
-				};
-			})
-		);
-
-		return RowsData;
 	}
 
-	function mapProduct( Product) {
-				
-		return {	
-			id: null,
-			type: Product.IsParent ? 'Variable' : 'Variacion',
-			sku: Product.SKU,
-			parent_sku: Product.ParentSKU || null,
-			name: Product.producto_1.Value,
-			category_ids: [],
-			image_id: '',
-			price: Product.precio_coste_8.Value,
-			sale_price: Product.precio_general_15.Value,
-			stock_quantity: 0
-		};
-	}
+	/* Actualize Products.RemoteData */
 
-	function merge(ActualProducts, ExcelProducts) {
-
+	function merge(ExcelProducts) {
+		
 		/* Remove */
 
 		var RemoveProductsIndex = [];
 		
-		ActualProducts.forEach(function(A, Index) {
+		Products.RemoteData.forEach(function(A, Index) {
 
 			var ExcelP = ExcelProducts.find(function(E) { 
 				
@@ -145,14 +85,14 @@ function (
 		RemoveProductsIndex = RemoveProductsIndex.reverse();
 		RemoveProductsIndex.forEach(function(Index) { 
 
-			ActualProducts.splice(Index, 1);
+			Products.RemoteData.splice(Index, 1);
 		});
 
 		/* Actualizar / Crear productos	*/
 
 		ExcelProducts.forEach(function(E) {
 
-			var ActualP = ActualProducts.find(function(A) { 
+			var ActualP = Products.RemoteData.find(function(A) { 
 				
 				return A.sku == E.sku; 
 			});
@@ -169,52 +109,132 @@ function (
 
 				E.id = null; 
 				E.dirty = true;
-				ActualProducts.push(E); 
+				Products.RemoteData.push(E); 
 			}
 		});
 	}
 
-	Self.mergeProducts = function(Rows) {
+	function formatProduct(Product) {
+
+		/*
+		% Impuesto: undefined
+		% Impuesto compra: undefined
+		Color: undefined
+		Control Stock: undefined
+		Código Barras: undefined
+		Familia: undefined
+		IsSimple: true
+		PLU: undefined
+		Parent: undefined
+		Precio Coste: undefined
+		Producto: undefined
+		Vars: undefined
+		Venta Peso: undefined
+		type: "symple"
+
+		return {
+			type: Producto.type,
+			parent_id: Producto['Código Barras']
+			sku: Producto
+			parent_sku: Producto
+			name: Producto
+			category_ids: [],
+			image_id: Producto
+			price: Producto
+			sale_price: Producto
+			stock_quantity: Producto
+		};
+		*/
+	}
+
+	/* Processs user interaction */
+
+	Self.process = function(RowsRange) {
 
 		var $Q = $q.defer();
-
+		
 		$rootScope.$broadcast('opendialog', {
-			Title: 'Excel to Web Products'
+			Title: 'Excel to Web Products',
+			CanCancel: true
 		});
-		$rootScope.$emit('notifydialog', 'Converting Excel format');
+		$rootScope.$emit('notifydialog', { text: 'Converting Excel format' });
 
 		$timeout(function() {
 
-			var ExcelProducts = digestRows(Rows)
-			.map(mapProduct);	
+			var ProductsData = digestRange(RowsRange);	
 
-			$rootScope.$emit('notifydialog', 'Updating web products');
+			$rootScope.$emit('notifydialog', { text: 'Updating categories...' });
 
 			$timeout(function() {
-				
-				merge(Products.RemoteData, ExcelProducts);
 
-				$rootScope.$emit('notifydialog', 'Updating list, wait...');
+				ProductsData = updateProductCategories(ProductsData);
+
+				$rootScope.$emit('notifydialog', { text: 'Grouping variations' });
 
 				$timeout(function() {
-					
-					Products.DS.read({ data: Products.RemoteData });
-					$rootScope.$emit('notifydialog', 'Updated!');
+
+					Products.RowsDS.data(ProductsData);
+					Products.RowsDS.group({ 
+						field: 'parentbase',
+						aggregates: [
+							{ field: 'parentbase', aggregate: 'count' }
+						]
+					});
+
+					Products.RowsDS.view().forEach(function(Group) {
+
+						var VarCount = Group.aggregates.parentbase.count;
+						Group.items.forEach(function(Item, Index) {
+
+							if(VarCount == 1) {
+
+								Item.set('Type', 'simple')
+							} else {
+
+								if(Index == 0) {
+
+									Item.set('Type', 'variable');
+								} else {
+
+									Item.set('Type', 'variation');
+								}
+							}
+						})
+					});
+
+					console.log(Products.RowsDS.data());
+
+					/*	merge(ExcelProducts);
+
+					$rootScope.$emit('notifydialog', { text: 'Updating list, wait...' });
 
 					$timeout(function() {
+						
+						Products.DS.read({ data: Products.RemoteData });
+						$rootScope.$emit('notifydialog', { text: 'Updated!' });
 
-						$rootScope.$emit('closedialog');
-						$rootScope.$broadcast('showproductsgrid');
+						$timeout(function() {
 
-						$Q.resolve();
+							$rootScope.$emit('closedialog');
+							$rootScope.$broadcast('showproductsgrid');
+
+							$Q.resolve();
+
+						}, 200);
 
 					}, 200);
+
+					*/
+
+				$rootScope.$emit('closedialog');
 
 				}, 200);
 
 			}, 200);
 
 		}, 200);
+
+		$Q.resolve();
 
 		return $Q.promise;
 	};

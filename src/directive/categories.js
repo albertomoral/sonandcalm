@@ -1,6 +1,7 @@
+/* categories.js */
 
-  APP.directive(
-    'poeticsoftUtilsCategories', 
+APP.directive(
+    'poeticsoftWooAgoraCategories', 
   function() {
 
     function controller(
@@ -169,7 +170,7 @@
       replace: true,
       scope: true,
       controller: controller,
-      template: `<div class="poeticsoft-utils-categories">
+      template: `<div class="poeticsoft-woo-agora-categories">
         <div class="Head">
           <div class="HeadWeb">Web</div>
           <div class="HeadFamilies">Families</div>

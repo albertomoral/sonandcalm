@@ -1,6 +1,7 @@
+/* images.js */
 
-  APP.directive(
-    'poeticsoftUtilsImages', 
+APP.directive(
+    'poeticsoftWooAgoraImages', 
   function() {
 
     function controller(
@@ -150,7 +151,7 @@
       replace: true,
       scope: true,
       controller: controller,
-      template: `<div class="poeticsoft-utils-images">
+      template: `<div class="poeticsoft-woo-agora-images">
         <div class="Images">
           <div class="Upload">
             <div class="UploadImageTools">           

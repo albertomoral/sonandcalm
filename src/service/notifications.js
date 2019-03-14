@@ -1,3 +1,4 @@
+/* notifications.js */
 
 APP.factory(
    'Notifications',
@@ -42,7 +43,7 @@ function (
 
 	jQuery(function() {
 
-		Self.$Notifications = jQuery('.poeticsoft-utils .Notifications');
+		Self.$Notifications = jQuery('.poeticsoft-woo-agora .Notifications');
 
 		Self.show('Loading APP, wait...')
 		Self.hide();

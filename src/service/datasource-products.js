@@ -1,7 +1,9 @@
+/* datasource-products.js */
 
 APP.factory(
 	'Products',
 function (
+	$http,
 	$q, 
 	$rootScope, 
 	$timeout, 
@@ -79,7 +81,51 @@ function (
 			Self.DS.read({ data: Self.RemoteData });
 		}
 	});
+	Self.RemoteDS.read();	
+
+	Self.RowsDS = new kendo.data.DataSource({	
+		transport: {
+			read: {
+				url: '/wp-json/poeticsoft/woo-product-rows-read',
+				type: 'GET',
+				dataType: 'json' 
+			},
+			update: {
+				url: '/wp-json/poeticsoft/woo-product-rows-update',
+				type: 'GET',
+				dataType: 'json' 
+			}
+		},
+		schema: {
+			data: 'Data'
+		},		
+		group: { 
+			field: 'parentbase',
+			aggregates: [
+				{ field: 'parentbase', aggregate: 'count' }
+			]
+		}	
+	});
 	Self.RemoteDS.read();
+
+	/* Excel FootPrint */
+
+	Self.FootPrint = [];
+
+	$http
+	.get('/wp-json/poeticsoft/get-agora-fields-footprint')
+	.then(
+		function(Response) {
+
+			if(Response.data.Status.Code == 'KO') {						
+		
+				$rootScope.$emit('closedialog');
+				return Notifications.show({ errors: Response.data.Status.Reason });
+			}
+
+			Self.FootPrint = Response.data.Data;
+		}
+	);
 
 	return Self;
 });

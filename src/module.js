@@ -1,3 +1,4 @@
+/* module.js */
 
 'use strict';
 

@@ -1,3 +1,5 @@
+/* datasource-images.js */
+
 APP.factory(
 	'Images', 
 function (

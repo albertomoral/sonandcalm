@@ -1,0 +1,20 @@
+.poeticsoft-woo-agora {
+	
+	.Notifications {
+
+		position: absolute;
+		top: 20px; 
+		right: 20px;
+		padding: 10px 20px;  
+		min-height: 20px;
+		text-align: right; 
+		background-color: #fefefe;
+		border: 1px solid #ccc; 
+		box-shadow: 0 0 12px #00000066;
+
+		&.Error {
+			
+			color: rgb(204, 24, 0);
+		}
+	}
+}

@@ -1,0 +1,13 @@
+
+body .k-window.k-dialog {
+
+	.k-dialog-buttongroup {
+
+		display: none;
+
+		&.CanCancel {
+
+			display: block;
+		}
+	}
+}
