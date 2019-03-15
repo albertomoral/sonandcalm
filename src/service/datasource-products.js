@@ -18,8 +18,6 @@ function (
 		transport: {
 			read: function(Op) {
 
-				console.log(Op);
-
 				Op.success(Op.data.data);
 			}
 		},
@@ -28,8 +26,6 @@ function (
 				id: 'sku',
 				parentId: 'parent_sku',
 				fields: {
-					'id': { type: 'number', editable: false, nullable: false },
-					'parent_id': { type: 'number', editable: false, nullable: false },
 					'sku': { type: 'string', editable: false },
 					'parent_sku': { type: 'string', editable: false, nullable: true },
 					'type': { type: 'string', editable: false },

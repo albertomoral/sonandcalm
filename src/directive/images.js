@@ -53,7 +53,6 @@ APP.directive(
         height: '100%',
         editable: 'inline',
         sortable: true,
-        autoBind: false,
         columns: [
           { 
             field: 'image', 

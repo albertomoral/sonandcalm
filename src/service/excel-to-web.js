@@ -56,6 +56,7 @@ function (
 
 		var FirstVariationIndex = 0;
 		var Parent = '';
+		var ParentId = 0;
 		var VarCount = 0;
 
 		ProductRows.forEach(function(ProductRow, Index) {
@@ -126,10 +127,8 @@ function (
 		*/
 
 		return {
-			id: Product['Código Barras'],
-			parent_id: Product.Parent == Product['Código Barras'] ? 0 : Product.Parent,
 			sku: Product['Código Barras'],
-			parent_sku: Product.Parent == Product['Código Barras'] ? 0 : Product.Parent,
+			parent_sku: Product.Parent == Product['Código Barras'] ? null : Product.Parent,
 			type: Product.Type,
 			name: Product.Producto,
 			category_ids: Product.Categories,
@@ -159,7 +158,10 @@ function (
 
 			$timeout(function() {	
 
-				Products.DS.read({ data: ProductsData.map(formatProduct) });
+				var ProductsMapped = ProductsData.map(formatProduct);
+				console.log(ProductsMapped);
+
+				Products.DS.read({ data: ProductsMapped });
 				
 				$rootScope.$emit('notifydialog', { text: 'Web products list updated, go to Web > Products' });
 
@@ -168,7 +170,7 @@ function (
 					$rootScope.$emit('closedialog');
 					$Q.resolve();
 
-				}, 2000);
+				}, 1000);
 
 			}, 200);
 
