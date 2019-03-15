@@ -41,14 +41,6 @@ function (
 		if(Time) { Self.hide(Time); }
 	}
 
-	jQuery(function() {
-
-		Self.$Notifications = jQuery('.poeticsoft-woo-agora .Notifications');
-
-		Self.show('Loading APP, wait...')
-		Self.hide();
-	});
-
 	return Self;
 });
         

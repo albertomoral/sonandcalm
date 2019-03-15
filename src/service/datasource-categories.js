@@ -3,19 +3,20 @@
 APP.factory(
 	'Categories', 
 function (
-	$q, 
-	$rootScope, 
-	$timeout, 
-	Notifications, 
-	Products
+	Notifications
 ) {
 
 	var Self = {};
-	var RemoteData; // Buffer for construct tree
+	var RemoteData; // Buffer for construct tree		
+
+	// Data source for CategoriesTreeViewConfig in Categories directive
+
+	Self.DS = new kendo.data.HierarchicalDataSource({});
 
 	// Load and transform data from woo-products-categories-read
 	// a plain woocommerce categories list 
 	// for consuming into a HierarchicalDataSource
+
 	function constructTree(Id) {
 
 		var ID = Id || 0;
@@ -63,12 +64,10 @@ function (
 			Self.DS.data(constructTree()); // Feed Self.DS
 		}
 	});
-	Self.RemoteDS.read();	
-
-	// Data source for CategoriesTreeViewConfig in Categories directive
-	Self.DS = new kendo.data.HierarchicalDataSource({});
+	Self.RemoteDS.read();
 	
 	// Data source for FamiliesListViewConfig in Categories directive
+
 	Self.RelationsDS = new kendo.data.DataSource ({
 		transport: {
 			read: {
@@ -92,7 +91,11 @@ function (
 				return null;
 			}
 		},		
-		error: Notifications.showNotifications
+		error: Notifications.showNotifications,
+		requestEnd: function(E) {			
+
+			Self.updateFamiliesCategories();
+		}
 	});
 	Self.RelationsDS.read();
 
@@ -113,6 +116,7 @@ function (
 
 		// Add new families
 		FamiliesList.forEach(function(Family) {
+
 			var FamilyExistent = Self.RelationsDS.get(Family);
 			if(!FamilyExistent) {
 
@@ -121,6 +125,20 @@ function (
 					categories: []
 				})
 			}
+		});
+
+		Self.updateFamiliesCategories();
+	}
+
+	Self.FamilyCategories = {};
+	Self.updateFamiliesCategories = function() {
+
+		Self.RelationsDS
+		.data()
+		.toJSON()
+		.forEach(function(Family, Index) {
+
+			Self.FamilyCategories[Family.family] = Family.categories;
 		});
 	}
 

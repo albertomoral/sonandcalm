@@ -9,7 +9,6 @@ APP.directive(
 			$rootScope,
 			$scope,
 			$timeout,
-			$window,
 			Notifications,
 			Products,
 			ColorSize,
@@ -17,6 +16,7 @@ APP.directive(
 		) {
 			
 			$scope.allowProcessing = false;
+			$scope.dataChanged = false;
 
 			// Loader
 
@@ -137,7 +137,7 @@ APP.directive(
 
 					if($.trim(SKU) != '') {
 
-						SKU = SKU.split(',').join('.');
+						SKU = $.trim(SKU).split(',').join('.');
 						SKUCell.value(SKU);
 
 						var Code = SKU.split('.');
@@ -214,41 +214,93 @@ APP.directive(
 						}
 
 					} else {
+				
+						$rootScope.$emit('notifydialog', { text: 'Data processed' });
 
-						
-						$rootScope.$emit('notifydialog', { text: 'Saving data...' });
+						$timeout(function() {
 
-						$http.post(
-							'/wp-json/poeticsoft/woo-agora-excel-data-update',
-							ProductsSheet.toJSON()
-						)
-						.then(function(Response) {
-		
-							var Code = Response.data.Status.Code;
-							if(Code == 'OK'){
-
-								$rootScope.$emit('closedialog');
-								Notifications.show(Response.data.Status.Message);
-								$scope.allowProcessing = true;
-
-							} else {
-		
-								Notifications.show({ errors: Response.data.Status.Reason });
-							}
-						});
+							$rootScope.$emit('closedialog');
+							$scope.allowProcessing = true;
+						}, 200);
 					}
 				}
 
 				parseRow();
 			}
-		
-			$scope.AgoraSpreadsheetConfig = {
-				toolbar: {
-					home: false,
-					insert: false,
-					data: false
-				}
-			};
+
+			/* Load excel saved */
+
+			$scope.loadData = function() {				
+
+				$rootScope.$broadcast('opendialog', {
+					Title: 'Loading Excel data'
+				});
+			
+				$scope.allowProcessing = false;
+
+				$http.get('/wp-json/poeticsoft/woo-agora-excel-data-read')
+				.then(function(Response) {
+
+					var Code = Response.data.Status.Code;
+					if(Code == 'OK'){ 
+
+						var ProductsSheetData = Response.data.Data;
+						delete ProductsSheetData.activeCell;
+						delete ProductsSheetData.selection;
+
+						$scope.AgoraKendoSpreadsheet.fromJSON({
+							sheets: [ProductsSheetData]
+						});				
+						
+						ProductsSheet = $scope.AgoraKendoSpreadsheet.activeSheet();
+						RowCount = ProductsSheet._rows._count;
+			
+						$scope.allowProcessing = true;
+
+						$rootScope.$emit('notifydialog', { text: Response.data.Status.Message });
+
+						$timeout(function() {
+
+							$rootScope.$emit('closedialog');
+						}, 200);
+
+					} else {
+
+						Notifications.show({ errors: Response.data.Status.Reason });
+					}
+				});
+			}
+
+			/* Save excel data */
+
+			$scope.saveData = function() {				
+
+				$rootScope.$broadcast('opendialog', {
+					Title: 'Saving Excel data'
+				});
+				
+				$rootScope.$emit('notifydialog', { text: 'Saving data...' });
+
+				$http.post(
+					'/wp-json/poeticsoft/woo-agora-excel-data-update',
+					ProductsSheet.toJSON()
+				)
+				.then(function(Response) {
+
+					var Code = Response.data.Status.Code;
+					if(Code == 'OK'){
+
+						$rootScope.$emit('closedialog');
+						Notifications.show(Response.data.Status.Message);
+						$scope.allowProcessing = true;
+						$scope.dataChanged = false;
+
+					} else {
+
+						Notifications.show({ errors: Response.data.Status.Reason });
+					}
+				});
+			}
 
 			// Generate excel to web products action
 
@@ -263,40 +315,30 @@ APP.directive(
 				}); 
 			}
 
+			/* Spreadsheet config */
+		
+			$scope.AgoraSpreadsheetConfig = {
+				toolbar: {
+					home: false,
+					insert: false,
+					data: false
+				},
+				change: function() {
+					
+					$scope.$apply(function() {
+						
+						$scope.dataChanged = true;
+					});
+				}
+			};
+
 			// Load Agora Excel data
 			
 			$scope.$on("kendoWidgetCreated", function(event, widget){
       
-        if (widget === $scope.AgoraKendoSpreadsheet) {
-
-					$http.get('/wp-json/poeticsoft/woo-agora-excel-data-read')
-					.then(function(Response) {
-
-						var Code = Response.data.Status.Code;
-						if(Code == 'OK'){ 
-
-							var ProductsSheetData = Response.data.Data;
-							delete ProductsSheetData.activeCell;
-							delete ProductsSheetData.selection;
-
-							$scope.AgoraKendoSpreadsheet.fromJSON({
-								sheets: [ProductsSheetData]
-							});				
-							
-							ProductsSheet = $scope.AgoraKendoSpreadsheet.activeSheet();
-							RowCount = ProductsSheet._rows._count;
-				
-							$scope.allowProcessing = true;
-
-							/* DEBUG */
-
-							$timeout($scope.generateWebProducts, 10);
-
-						} else {
-
-							return Notifications.show({ errors: Response.data.Status.Reason });
-						}
-					});
+        if (widget === $scope.AgoraKendoSpreadsheet) { 
+					
+					$scope.loadData();
 				}
 			});
 		}
@@ -314,10 +356,20 @@ APP.directive(
 						     k-options="AgoraKendoUploadConfig"
 					/>
 					<div class="Actions">
-						<button class="Generate k-button"
+						<button class="k-button"
 										ng-click="generateWebProducts()"
 										ng-disabled="!allowProcessing">
-							Generate web products
+							To web
+						</button>
+						<button class="k-button"
+										ng-click="loadData()"
+										ng-disabled="!dataChanged">
+							Revert
+						</button>
+						<button class="k-button"
+										ng-click="saveData()"
+										ng-disabled="!dataChanged">
+							Save
 						</button>
 					</div>
 				</div>

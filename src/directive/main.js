@@ -5,9 +5,6 @@ APP.directive(
 function() {
 
 	function controller(
-		$rootScope,
-		$timeout,
-		$scope, 
 		$window
 	) {
 
@@ -34,8 +31,8 @@ function() {
 			<div kendo-tab-strip>
 				<ul>
 					<!-- li>Color Size</li -->
-					<li class="k-state-active">Agora</li>
-					<li>Web</li>
+					<li>Agora</li>
+					<li class="k-state-active">Web</li>
 				</ul>                      
 				<!-- poeticsoft-woo-agora-color-size></poeticsoft-woo-agora-color-size -->                 
 				<poeticsoft-woo-agora-excel></poeticsoft-woo-agora-excel> 
@@ -53,7 +50,6 @@ function() {
 				</div>
 			</div>
 			<poeticsoft-woo-agora-dialog></poeticsoft-woo-agora-dialog>
-			<div class="Notifications"></div>
 		</div>`
 	};
 });

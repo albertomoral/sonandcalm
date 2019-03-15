@@ -11,6 +11,8 @@ function (
 
 	var Self = {};
 
+	Self.Group = {};
+
 	Self.DS = new kendo.data.DataSource({
 		transport: {
 			read: {
@@ -49,17 +51,20 @@ function (
 		group: { 
 			field: 'sku',
 			aggregates: [
-				{ field: 'sku', aggregate: 'count' }
+				{ 
+					field: 'sku', 
+					aggregate: 'count' 
+				}
 			]
 		},		
 		error: Notifications.show,
 		change: function() {
 
-			Self.ImageGroups = {};
+			Self.Group = {};
 			
 			this.view().forEach(function(G){
 
-				Self.ImageGroups[G.value] = {
+				Self.Group[G.value] = {
 					count: G.items.length,
 					items: G.items
 				}

@@ -7,8 +7,6 @@ APP.directive(
     function controller(
 			$scope, 
 			$rootScope, 
-			$timeout, 
-			ExcelToWeb,
 			$document
 		) {
 
@@ -26,28 +24,6 @@ APP.directive(
 				width: '450',
 				closable: false,
 				actions: [
-					/*
-					{ 
-						text: 'Pause',
-						action: function() {
-
-							ExcelToWeb.pauseProcess();
-							Buttons.Continue.removeAttr('disabled');
-							Buttons.Pause.attr('disabled', 'disabled');
-							return false;
-						}
-					},
-					{ 
-						text: 'Continue',
-						action: function() {
-							
-							ExcelToWeb.continueProcess();
-							Buttons.Pause.removeAttr('disabled');
-							Buttons.Continue.attr('disabled', 'disabled');
-							return false;
-						}
-					},
-				*/
 					{ 
 						text: 'Cancel',
 						action: cancel

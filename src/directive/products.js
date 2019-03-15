@@ -10,50 +10,14 @@ function() {
     $rootScope,
     $scope, 
     $timeout,
-    $element,
-    Notifications,
-    Products, 
-    Categories, 
-    Images,
     $window, 
-    $http
+    Products, 
+    Categories
   ) {
 
     /* ----------------------------------------------------
       PRODUCT TREE LIST
     */
-
-    /* Categories editor */
-
-    var editCategories = function (container, options) {
-      $('<select name="' + options.field + '"/>')
-      .appendTo(container)
-      .kendoMultiSelect({
-        dataSource: Categories.DS,
-        valuePrimitive: true,
-        dataValueField: 'id',
-        dataTextField: 'name'
-      });
-    };
-
-    function beforeEdit(E) {
-
-      if(E.model.parent_sku) { E.preventDefault(); }
-    }
-
-    function cellClose(E) {
-
-      if(E.type == 'save') {
-
-        var NewValue = E.model.get('category_ids');
-        var ChildNodes = Products.DS.childNodes(E.model);
-
-        ChildNodes.forEach(function(Child) {
-
-          Child.set('category_ids', NewValue);
-        });
-      }
-    }
 
     // Reload products
 
@@ -87,14 +51,7 @@ function() {
         return Text;
       })
       .join(' - ');
-    }    
-    
-    $scope.getProductImages = function(SKU) {
-
-      return '';
-
-      return Images.ImageGroups[SKU] ? Images.ImageGroups[SKU].count : '';
-    }
+    } 
 
     /* Columns config */
 
@@ -113,7 +70,6 @@ function() {
         field: 'category_ids',
         title: 'Categories',
         template: '{{ getCategories(dataItem) }}',
-        // editor: editCategories,
         width: 200,
         attributes: { class: 'Editable {{ dataItem.type }}' }
       },
@@ -123,7 +79,6 @@ function() {
         title: 'Imagen',
         width: 90
       },
-      */
       { 
         title: 'Images',
         template: '<div class="k-icon">{{ getProductImages(dataItem.sku) }}</div>',
@@ -132,6 +87,7 @@ function() {
           class: 'Images'
         }
       },
+      */
       {
         field: 'price',
         title: 'Price',
@@ -147,10 +103,8 @@ function() {
     $scope.productTreeListConfig = {
       dataSource: Products.DS,
       sortable: true,
-      editable: 'incell',
-      resizable: true,
-      beforeEdit: beforeEdit,
-      cellClose: cellClose,
+      resizable: true, 
+      autoBind: false,     
       collapse: function(e) {
         
         e.preventDefault();
@@ -167,36 +121,24 @@ function() {
           click: revert
         },
         'excel',
-        'pdf',
-        {
-          name: 'save',
-          text: 'Save',
-          click: function(){
-
-            Products.DS.sync();
-          }
-        }
+        'pdf'
       ]
     }; 
-    
-    $scope.TreeListReady = false;
-    $scope.$on('hideproductsgrid', function(event) {
 
-      $scope.$apply(function() {
-          
-        $scope.TreeListReady = false;
-      });
+    function resize() {        
+
+      $scope.ProductKendoTreeList.resize();
+    }
+
+    $scope.$on("kendoWidgetCreated", function(event, widget){
+      
+      if (widget === $scope.ProductKendoTreeList) {
+        
+        resize();
+      }
     });
 
-    $scope.$on('showproductsgrid', function(event) {
-
-      $scope.TreeListReady = true;
-
-      $timeout(function() {
-
-        var ProductKendoTreeList = $($element).find('#ProductKendoTreeList').data('kendoTreeList');
-      }, 0);
-    });
+    angular.element($window).on('resize', resize);
   }
 
   return {
@@ -208,14 +150,7 @@ function() {
       <div class="WebProductsView">
         <div kendo-tree-list="ProductKendoTreeList"
               id="ProductKendoTreeList"
-              k-options="productTreeListConfig"
-              ng-if="TreeListReady">
-        </div>
-        <div class="k-loading-mask"
-              ng-if="!TreeListReady">
-          <span class="k-loading-text">Loading...</span>
-          <div class="k-loading-image"></div>
-          <div class="k-loading-color"></div>
+              k-options="productTreeListConfig">
         </div>
       </div>
     </div>`

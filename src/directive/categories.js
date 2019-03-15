@@ -8,9 +8,7 @@ APP.directive(
       $scope, 
       $http, 
       Notifications, 
-      Categories, 
-      ExcelToWeb, 
-      $window
+      Categories
     ) {
 
       $scope.SelectedCategorieId = null;
@@ -172,6 +170,18 @@ APP.directive(
       controller: controller,
       template: `<div class="poeticsoft-woo-agora-categories">
         <div class="Head">
+          <div class="Tools">
+            <button data-ng-click="revert()"
+                    ng-disabled="!TreeChanged"
+                    class="k-button">
+              Revert to saved
+            </button>
+            <button data-ng-click="save()"
+                    ng-disabled="!TreeChanged"
+                    class="k-button">
+              Save to web
+            </button>
+          </div>
           <div class="HeadWeb">Web</div>
           <div class="HeadFamilies">Families</div>
         </div>
@@ -191,18 +201,6 @@ APP.directive(
               kendo-list-view="FamiliesListView"
               k-options="FamiliesListViewConfig">
           </div>
-        </div>
-        <div class="Footer">
-          <button data-ng-click="revert()"
-                  ng-disabled="!TreeChanged"
-                  class="k-button">
-            Revert to saved
-          </button>
-          <button data-ng-click="save()"
-                  ng-disabled="!TreeChanged"
-                  class="k-button">
-            Save to web
-          </button>
         </div>
       </div>`
     };

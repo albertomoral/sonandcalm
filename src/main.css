@@ -127,7 +127,7 @@
     .poeticsoft-woo-agora .poeticsoft-woo-agora-excel .SpreadsheetTools .k-widget > button {
       display: none; }
     .poeticsoft-woo-agora .poeticsoft-woo-agora-excel .SpreadsheetTools .k-widget.k-upload {
-      width: calc(100% - 200px); }
+      width: calc(100% - 270px); }
       .poeticsoft-woo-agora .poeticsoft-woo-agora-excel .SpreadsheetTools .k-widget.k-upload .k-button {
         margin: 5px; }
       .poeticsoft-woo-agora .poeticsoft-woo-agora-excel .SpreadsheetTools .k-widget.k-upload .k-file-extension-wrapper {
@@ -152,12 +152,14 @@
           top: 2px;
           right: 6px; }
   .poeticsoft-woo-agora .poeticsoft-woo-agora-excel .SpreadsheetTools .Actions {
-    width: 200px;
+    width: 270px;
     display: flex;
     align-items: center;
     justify-content: flex-end; }
-    .poeticsoft-woo-agora .poeticsoft-woo-agora-excel .SpreadsheetTools .Actions button.Attributes {
-      margin-right: 10px; }
+    .poeticsoft-woo-agora .poeticsoft-woo-agora-excel .SpreadsheetTools .Actions button {
+      padding: 2px 15px; }
+    .poeticsoft-woo-agora .poeticsoft-woo-agora-excel .SpreadsheetTools .Actions button + button {
+      margin-left: 10px; }
 
 .poeticsoft-woo-agora .poeticsoft-woo-agora-excel .SpreadsheetView {
   position: absolute;
@@ -220,7 +222,7 @@
       /* text-align: right; */
       padding: 5px; }
     .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content {
-      height: calc(100% - 114px) !important; }
+      height: calc(100% - 115px) !important; }
       .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content .k-icon.k-i-collapse {
         margin: -2px 2px 0 0; }
         .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content .k-icon.k-i-collapse:before {
@@ -235,6 +237,8 @@
           font: inherit;
           width: auto;
           height: auto; }
+    .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-status {
+      display: none; }
   .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView td.Editable.Variable,
   .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView td.Editable.Simple {
     background-color: #eff5dc66;
@@ -242,13 +246,18 @@
 
 /* _categories.scss */
 .poeticsoft-woo-agora .poeticsoft-woo-agora-categories {
-  padding: 10px;
+  padding: 5px;
   /* HEAD */
   /* VIEWS */
   /* FOOTER */ }
   .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Head {
     display: flex;
-    justify-content: space-between; }
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 0 0 0 15px; }
+    .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Head .Tools {
+      width: 100%;
+      text-align: right; }
     .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Head .HeadWeb,
     .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Head .HeadFamilies {
       padding: 0 0 5px; }
@@ -263,10 +272,10 @@
   .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Views {
     display: flex;
     position: absolute;
-    top: 60px;
-    right: 14px;
-    bottom: 52px;
-    left: 10px;
+    top: 67px;
+    right: 5px;
+    bottom: 5px;
+    left: 15px;
     /* CATEGORIES */
     /* TOOLS */
     /* FAMILIES */ }
@@ -348,13 +357,15 @@ body .k-window.k-dialog .k-dialog-buttongroup {
 
 .poeticsoft-woo-agora .Notifications {
   position: absolute;
-  top: 20px;
-  right: 20px;
-  padding: 10px 20px;
+  right: 30px;
+  padding: 20px 30px;
+  bottom: 30px;
   min-height: 20px;
   text-align: right;
   background-color: #fefefe;
   border: 1px solid #ccc;
-  box-shadow: 0 0 12px #00000066; }
+  box-shadow: 0 0 12px #00000066;
+  z-index: 2;
+  display: none; }
   .poeticsoft-woo-agora .Notifications.Error {
     color: #cc1800; }
