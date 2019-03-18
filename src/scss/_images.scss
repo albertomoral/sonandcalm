@@ -74,14 +74,53 @@
 					.k-header {
 
 						padding: 5px;
+						text-align: right;
 
 						button {
 
 							margin: 0;
 						}
+
+						button + button {
+
+							margin: 0 0 0 5px;
+						}
 					}
 
 					.k-grid-content {
+
+						.k-grouping-row:not(:first-child) {
+
+							td {
+
+								border: solid #ccc;
+								border-width: 1px 0 0 0;
+							}
+						}
+
+						.k-grouping-row {
+							
+							td {
+
+								span.Count {
+
+									color: #0c0;
+								}
+
+								span.Product {
+
+									&.k-i-check-circle {
+
+										color: #0c0;
+									}
+
+									&.k-i-close-circle {
+
+										color: #c00;
+									}
+								}
+							}
+						}
 
 						td.Product {
 

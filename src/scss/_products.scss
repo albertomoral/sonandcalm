@@ -68,6 +68,54 @@
 							}
 						}
 					}
+
+					td.Status {
+
+						text-align: center;
+
+						.k-icon {
+
+							&.updated {
+
+								color: #0c0;
+
+								&:before {
+									
+									content: "\e11a";
+								}
+							}
+
+							&.changed {
+
+								color: #cc0;
+
+								&:before {
+									
+									content: "\e11a";
+								}
+							}
+
+							&.new {
+
+								color: #cc0;
+
+								&:before {
+									
+									content: "\e11a";
+								}
+							}
+
+							&.deleted {
+
+								color: #cc0;
+
+								&:before {
+									
+									content: "\e11a";
+								}
+							}
+						}
+					}
 				}
 
 				.k-status {

@@ -12,6 +12,8 @@ function (
 
 	var Self = {};
 
+	Self.RemoteData = {};
+
 	Self.DS = new kendo.data.TreeListDataSource ({
 		page: 1,
 		pageSize: 20,
@@ -34,7 +36,8 @@ function (
 					'image_id': { type: 'number', editable: false },
 					'price': { type: 'number', editable: false },
 					'sale_price': { type: 'number', editable: false },
-					'stock_quantity': { type: 'number', editable: false }
+					'stock_quantity': { type: 'number', editable: false },
+					'status': { type: 'string', editable: false }
 				},
 				expanded: true
 			}
@@ -59,6 +62,13 @@ function (
 		},		
 		error: Notifications.showNotifications,
 		requestEnd: function(E) {
+
+			Self.RemoteData = {};
+			E.response.Data.forEach(function(Product) {
+
+				Product.status = 'updated';
+				Self.RemoteData[Product.sku] = Product;
+			});
 
 			Self.DS.read({ data: E.response.Data });
 		}

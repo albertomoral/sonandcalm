@@ -35,10 +35,12 @@ function (
 			model: {
 				id: 'name',
 				fields: {
+					ordername: { type: 'string', editable: false },
 					name: { type: 'string', editable: false },
 					size: { type: 'string', editable: false },
 					date: { type: 'date', editable: false },
-					sku: { type: 'string', editable: false }
+					sku: { type: 'string', editable: false },
+					attid: { type: 'string', editable: false }
 				}
 			},
 			data: 'Data',
@@ -56,7 +58,17 @@ function (
 					aggregate: 'count' 
 				}
 			]
-		},		
+		},
+		sort: [
+			{
+				field: 'ordername',
+				dir: 'asc'
+			},	
+			{
+				field: 'sku',
+				dir: 'asc'
+			}
+		],	
 		error: Notifications.show,
 		change: function() {
 

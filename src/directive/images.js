@@ -26,11 +26,13 @@ APP.directive(
 
             return Notifications.show({ errors: result.response.Status.Reason });
           }
+        },
+        complete: function() {
 
           $scope.imageGridConfig.dataSource.read();
         },
         validation: {
-          allowedExtensions: ['.jpg', '.jpeg', '.png', '.gif', '.tif', '.tiff'],          
+          allowedExtensions: ['.jpg', '.jpeg', '.png', '.gif'],          
           maxFileSize: 1
         },
         dropZone: '.Images .Upload'
@@ -45,7 +47,7 @@ APP.directive(
 
       $scope.haveProduct = function(SKU) {
 
-        return Products.DS.get(SKU) ? 'k-icon k-i-check-circle' : 'k-icon k-i-close-circle';
+        return Products.RemoteData[SKU] ? 'k-icon k-i-check-circle' : 'k-icon k-i-close-circle';
       }
 
       $scope.imageGridConfig = {
@@ -55,11 +57,26 @@ APP.directive(
         sortable: true,
         columns: [
           { 
+            field: 'sku',
+            title: '&nbsp',
+            groupHeaderTemplate: '<span class="Product {{ haveProduct(dataItem.sku) }}"></span>' +
+                                 '#= value # ' +
+                                 '<span class="Count">[#= count #]</span>',                                 
+            template: '&nbsp;',            
+            width: '1px',
+            aggregates: ['count']
+          },
+          { 
             field: 'image', 
             title: '&nbsp;',
-            template: '<img src="https://sonandcalm.kaldeera.com/wp-content/product-images/thumb/#: name #" ' +
+            template: '<img src="/wp-content/uploads/product-images/#: name  #?#= Math.round(Math.random() * 1000) #" ' +
                            'style="display: block; width:100%;"/>',           
             width: '100px'
+          },
+          { 
+            field: 'attid',
+            title: 'ID',           
+            width: '70px'
           },
           { 
             field: 'name', 
@@ -70,16 +87,24 @@ APP.directive(
             title: 'Date',
             format: '{0:M/d/yyyy h:mm tt}',
             width: '150px'
+          }/*
+          {
+            field: 'sku',
+            title: '&nbsp',
+            groupHeaderTemplate: '<span class="Product {{ haveProduct(dataItem.sku) }}"></span>' +
+                                 '#= value # ' +
+                                 '<span class="Count">[#= count #]</span>',
+            aggregates: ['count']
           },
           { 
             field: 'sku',
-            title: 'Product',
+            title: 'SKU',
             template: '<div class="{{ haveProduct(dataItem.sku) }}"></div>',
             width: '65px',
             attributes: {
               class: 'Product'
             }
-          }/*,
+          },
           { 
             field: 'size',
             title: 'Size',
@@ -101,15 +126,50 @@ APP.directive(
         toolbar: [
           { 
             name: 'refresh', 
-            template: '<button data-ng-click=\'refresh()\' class=\'k-button\'>Refresh</button>' 
+            template: '<button data-ng-click="refresh()" class="k-button">Refresh</button>' 
+          },
+          {
+            name: 'openall', 
+            template: '<button data-ng-click="openall()" class="k-button">Open All</button>'
+          },
+          {
+            name: 'closeall', 
+            template: '<button data-ng-click="closeall()" class="k-button">Close All</button>'
           }
-        ]
+        ],
+        dataBound: function (e) {
+
+          var grid = this;
+
+          $(".k-grouping-row")
+          .each(function (e) {
+              grid.collapseGroup(this);
+          });
+       }
       }
 
       $scope.refresh = function() {
 
         Images.DS.read();
-      }       
+      }
+      
+      $scope.openall = function() {
+
+        $scope.ImageKendoGrid
+        .element.find('.k-grouping-row')
+        .each(function (e) {
+          $scope.ImageKendoGrid.expandGroup(this);
+        });
+      }
+      
+      $scope.closeall = function() {
+
+        $scope.ImageKendoGrid
+        .element.find('.k-grouping-row')
+        .each(function (e) {
+          $scope.ImageKendoGrid.collapseGroup(this);
+        });
+      }
 
       function resize() {        
 

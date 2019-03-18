@@ -237,6 +237,24 @@
           font: inherit;
           width: auto;
           height: auto; }
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Status {
+        text-align: center; }
+        .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Status .k-icon.updated {
+          color: #0c0; }
+          .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Status .k-icon.updated:before {
+            content: "\e11a"; }
+        .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Status .k-icon.changed {
+          color: #cc0; }
+          .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Status .k-icon.changed:before {
+            content: "\e11a"; }
+        .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Status .k-icon.new {
+          color: #cc0; }
+          .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Status .k-icon.new:before {
+            content: "\e11a"; }
+        .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Status .k-icon.deleted {
+          color: #cc0; }
+          .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Status .k-icon.deleted:before {
+            content: "\e11a"; }
     .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-status {
       display: none; }
   .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView td.Editable.Variable,
@@ -340,9 +358,21 @@
     .poeticsoft-woo-agora .poeticsoft-woo-agora-images .Images .List {
       width: 65%; }
       .poeticsoft-woo-agora .poeticsoft-woo-agora-images .Images .List .k-grid .k-header {
-        padding: 5px; }
+        padding: 5px;
+        text-align: right; }
         .poeticsoft-woo-agora .poeticsoft-woo-agora-images .Images .List .k-grid .k-header button {
           margin: 0; }
+        .poeticsoft-woo-agora .poeticsoft-woo-agora-images .Images .List .k-grid .k-header button + button {
+          margin: 0 0 0 5px; }
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-images .Images .List .k-grid .k-grid-content .k-grouping-row:not(:first-child) td {
+        border: solid #ccc;
+        border-width: 1px 0 0 0; }
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-images .Images .List .k-grid .k-grid-content .k-grouping-row td span.Count {
+        color: #0c0; }
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-images .Images .List .k-grid .k-grid-content .k-grouping-row td span.Product.k-i-check-circle {
+        color: #0c0; }
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-images .Images .List .k-grid .k-grid-content .k-grouping-row td span.Product.k-i-close-circle {
+        color: #c00; }
       .poeticsoft-woo-agora .poeticsoft-woo-agora-images .Images .List .k-grid .k-grid-content td.Product {
         text-align: center; }
         .poeticsoft-woo-agora .poeticsoft-woo-agora-images .Images .List .k-grid .k-grid-content td.Product .k-icon.k-i-check-circle {

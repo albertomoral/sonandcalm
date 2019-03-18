@@ -41,6 +41,12 @@ function (
 		if(Time) { Self.hide(Time); }
 	}
 
+	$(function() {
+
+		Self.$Notifications = $('<div class="Notifications"></div>');
+		$('.poeticsoft-woo-agora').append(Self.$Notifications);
+	});
+
 	return Self;
 });
         

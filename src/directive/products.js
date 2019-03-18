@@ -97,6 +97,15 @@ function() {
         field: 'stock_quantity',
         title: 'Stock',
         width: 90
+      },
+      {
+        field: 'status',
+        title: 'Status',
+        width: 60,
+        template: '<div class="k-icon #= status #" title="#= status #"></div>',
+        attributes: {
+          class: 'Status'
+        }
       }
     ];
 

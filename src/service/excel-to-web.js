@@ -8,7 +8,8 @@ function (
 		$timeout, 
 		Products,
 		Categories,
-		Images
+		Images,
+		ColorSize
 ) {
 	
 	var Self = {};
@@ -75,13 +76,17 @@ function (
 			VarCount++;
 		});
 
-		/* calculate Type & Images & Categories*/
+		/* Calculate Type & Variations, Images, Categories*/
 		
 		ProductRows.forEach(function(ProductRow, Index) {
 
 			if(ProductRow.Vars == 0) {
 
 				ProductRow.Type = 'variation';
+				ProductRow.Attributes = {
+					attribute_color: '',
+					attribute_size: ''
+				}
 
 			} else {
 
@@ -92,57 +97,105 @@ function (
 				} else {
 
 					ProductRow.Type = 'variable';
+					ProductRow.Attributes = {
+						color: {},
+						size: {}
+					}
 				}
 			}
 
 			ProductRow.Images = Images.Group[ProductRow['Código Barras']] ? true : false;
-
 			ProductRow.Categories = Categories.FamilyCategories[ProductRow.Familia] || [];
 		});
 
 		return ProductRows;
 	}
 
+	/*
+	% Impuesto: "Sí"
+	% Impuesto compra: "No"
+	Categories: (4) [34, 48, 35, 23]
+	Color: 190
+	Control Stock: "#BACDE2"
+	Código Barras: "01.BLAN.BAKU.CHAR.250"
+	Familia: "BLANKET"
+	Images: false
+	PLU: 21
+	Parent: "01.BLAN.BAKU.CHAR.250"
+	Precio Coste: 21
+	Precio General: "160x250"
+	Producto: "BLANKET BAKUGA CHARCOAL 250CM"
+	Size: 73
+	Type: "variable"
+	Vars: 4
+	Venta Peso: "BLANKET BAKUGA CHARCOAL 250CM"
+	texto Boton: "GRIS OSCURO"
+	*/
+
+	function compareCategories(RemoteProductCategories, ProductCategories) {
+
+		var RC = [].concat(RemoteProductCategories).sort().join();
+		var PC = [].concat(ProductCategories).sort().join();
+		return RC != PC;
+	}
+
+	function somethingChanged(RemoteProduct, Product) {
+
+		return compareCategories(RemoteProduct.category_ids, Product.Categories) ||
+					 RemoteProduct
+	}
+
+	function mergeProductData() {
+
+		var SKU = Product['Código Barras'];
+		var RemoteProduct = Products.RemoteData[SKU];
+		var Status = 'updated';
+		if(!RemoteProduct) { Status = 'new'; }
+		if(somethingChanged(RemoteProduct, Product)) {
+
+			Status = 'changed';
+		}
+	}
+
 	function formatProduct(Product) {
 
-		/*
-		% Impuesto: "Sí"
-		% Impuesto compra: "No"
-		Categories: (4) [34, 48, 35, 23]
-		Color: 190
-		Control Stock: "#BACDE2"
-		Código Barras: "01.BLAN.BAKU.CHAR.250"
-		Familia: "BLANKET"
-		Images: false
-		PLU: 21
-		Parent: "01.BLAN.BAKU.CHAR.250"
-		Precio Coste: 21
-		Precio General: "160x250"
-		Producto: "BLANKET BAKUGA CHARCOAL 250CM"
-		Size: 73
-		Type: "variable"
-		Vars: 4
-		Venta Peso: "BLANKET BAKUGA CHARCOAL 250CM"
-		texto Boton: "GRIS OSCURO"
-		*/
+		var SKU = Product['Código Barras'];
 
 		return {
-			sku: Product['Código Barras'],
-			parent_sku: Product.Parent == Product['Código Barras'] ? null : Product.Parent,
+
+			/* Calculated from Excel */
+			sku: SKU,
+			parent_sku: Product.Parent == SKU ? null : Product.Parent,
 			type: Product.Type,
 			name: Product.Producto,
 			category_ids: Product.Categories,
-			image_id: '',
 			sale_price: Product['Precio General'],
+
+			/* Calculated from ColorSize */
+			attributes: {
+					attribute_color: ColorSize.Data[SKU] && ColorSize.Data[SKU].color || null,
+					attribute_size: ColorSize.Data[SKU] && ColorSize.Data[SKU].size || null
+			},
+			
+			/* Calculated from Images */
+			image_id: Images.Group[SKU] && Images.Group[SKU].items[0].attid,
+			gallery_image_ids: [],
+			variation_gallery_images: [],			
+			
+			/* Calculated from Stock */
 			stock_quantity: 0
 		};
 	}
 
-	/* Processs user interaction */
+	/* Processs on user interaction */
+
+	var NewProductsData = {};
 
 	Self.process = function(RowsRange) {
 
 		var $Q = $q.defer();
+		
+		NewProductsData = {};
 		
 		$rootScope.$broadcast('opendialog', {
 			Title: 'Excel to Web Products',
@@ -152,16 +205,30 @@ function (
 
 		$timeout(function() {
 
-			var ProductsData = digestRange(RowsRange);	
+			// Sort, Calculate Parent, Categories, Color, Size, Type, Variations ...
+			digestRange(RowsRange)
+			// Translate to WooCommerce struct
+			.map(formatProduct)
+			// Save list
+			.forEach(function(Product) {
+
+				NewProductsData[Product.sku] = Product;
+			});
+			
+			console.log(NewProductsData);
+
+			$rootScope.$emit('closedialog');
+			$Q.resolve();
+
+			/*
 
 			$rootScope.$emit('notifydialog', { text: 'Updating web products list' });
 
 			$timeout(function() {	
 
-				var ProductsMapped = ProductsData.map(formatProduct);
-				console.log(ProductsMapped);
+				var NewProductsStatus = ProductsData.map(formatProduct);
 
-				Products.DS.read({ data: ProductsMapped });
+				// Products.DS.read({ data: ProductsMapped });
 				
 				$rootScope.$emit('notifydialog', { text: 'Web products list updated, go to Web > Products' });
 
@@ -173,6 +240,8 @@ function (
 				}, 1000);
 
 			}, 200);
+
+			*/
 
 		}, 200);
 
