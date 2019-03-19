@@ -12,11 +12,63 @@ function (
 
 	var Self = {};
 
-	Self.RemoteData = {};
+	/* Local data for process */
+
+	Self.WebData = {};
+	Self.NewData = {};
+	Self.TempData = {};
+
+	function mergeData(SKU) {
+		
+		return false;
+	}
+
+	Self.processDifferences = function() {
+
+		Self.TempData = {};
+
+		/* Mark as removed web product if not in Agora */
+
+		Object.keys(Self.WebData)
+		.forEach(function(SKU) {
+
+			Self.TempData[SKU] = Self.WebData[SKU];
+			if(!Self.NewData[SKU]) { Self.TempData[SKU].status = 'deleted';  }
+		});
+
+		Object.keys(Self.NewData)
+		.forEach(function(SKU) {
+
+			Self.TempData[SKU] = Self.NewData[SKU];
+			Self.TempData[SKU].status = 'updated';			
+
+			/* Mark as new if not in web */
+
+			if(!Self.WebData[SKU]) { Self.TempData[SKU].status = 'new'; }				
+
+			/* Mark as changed if is in web but different */
+
+			else { if(mergeData(SKU)){ Self.TempData[SKU].status = 'changed'; } }
+
+		});
+
+		/* visualize result */
+
+		var TempData = [];
+		Object.keys(Self.TempData)
+		.forEach(function(SKU) {
+
+			TempData.push(Self.TempData[SKU]);
+		});
+
+		Self.DS.read({ data: TempData });
+	}
+
+	/* Data structure for visualization */
 
 	Self.DS = new kendo.data.TreeListDataSource ({
-		page: 1,
-		pageSize: 20,
+		// page: 1,
+		// pageSize: 20,
 		transport: {
 			read: function(Op) {
 
@@ -37,45 +89,50 @@ function (
 					'price': { type: 'number', editable: false },
 					'sale_price': { type: 'number', editable: false },
 					'stock_quantity': { type: 'number', editable: false },
-					'status': { type: 'string', editable: false }
+					'status': { type: 'string', editable: false } // 'updated', 'deleted', 'new', 'changed'
 				},
 				expanded: true
 			}
 		}
 	});
 
-	Self.RemoteDS = new kendo.data.DataSource({	
-		transport: {
-			read: {
-				url: '/wp-json/poeticsoft/woo-products-read',
-				type: 'GET',
-				dataType: 'json' 
+	/* Load Web Products Data */
+
+	Self.loadWebProducts = function() {
+
+		var $Q = $q.defer();
+
+		$http
+		.get('/wp-json/poeticsoft/woo-products-read')
+		.then(
+			function(Response) {
+
+				$Q.resolve();
+
+				if(Response.data.Status.Code == 'KO') {						
+			
+					$rootScope.$emit('closedialog');
+					return Notifications.show({ errors: Response.data.Status.Reason });
+				}			
+
+				Self.WebData = {};
+				Response.data.Data.forEach(function(Product) {
+
+					Product.status = 'updated';
+					Self.WebData[Product.sku] = Product;
+				});
+
+				/* Visuaize */
+
+				Self.DS.read({ data: Response.data.Data });
 			}
-		},
-		schema: {
-			data: 'Data',
-			errors: function (Response) {
+		);
 
-				if (Response.Status.Code == 'KO') { return Response.Status.Reason; }
-				return null;
-			}
-		},		
-		error: Notifications.showNotifications,
-		requestEnd: function(E) {
+		return $Q.promise;
+	}
+	Self.loadWebProducts();
 
-			Self.RemoteData = {};
-			E.response.Data.forEach(function(Product) {
-
-				Product.status = 'updated';
-				Self.RemoteData[Product.sku] = Product;
-			});
-
-			Self.DS.read({ data: E.response.Data });
-		}
-	});
-	Self.RemoteDS.read();
-
-	/* Excel FootPrint */
+	/* Load Excel FootPrint */
 
 	Self.FootPrint = [];
 	$http
@@ -91,7 +148,7 @@ function (
 
 			Self.FootPrint = Response.data.Data;
 		}
-	);
+	);	
 
 	return Self;
 });

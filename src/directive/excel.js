@@ -224,7 +224,7 @@ APP.directive(
 						}, 200);
 					}
 				}
-
+				
 				parseRow();
 			}
 

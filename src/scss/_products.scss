@@ -33,7 +33,7 @@
 				
 				.k-grid-content { 
 
-					height: calc(100% - 115px) !important;
+					height: calc(100% - 71px) !important;
 					
 					.k-icon.k-i-collapse { 
 
@@ -87,31 +87,31 @@
 
 							&.changed {
 
-								color: #cc0;
+								color: #ffac00;
 
 								&:before {
 									
-									content: "\e11a";
+									content: "\e403";
 								}
 							}
 
 							&.new {
 
-								color: #cc0;
+								color: #00b1ff;
 
 								&:before {
 									
-									content: "\e11a";
+									content: "\e907";
 								}
 							}
 
 							&.deleted {
 
-								color: #cc0;
+								color: #c00;
 
 								&:before {
 									
-									content: "\e11a";
+									content: "\e11c";
 								}
 							}
 						}

@@ -8,62 +8,46 @@
 
 		/* HEAD */
 
-		.Head {
+		.Tools {
 
-			display: flex;
-			flex-wrap: wrap;
-			justify-content: space-between;
-			padding: 0 0 0 15px;
-
-			.Tools {
-
-				width: 100%;
-				text-align: right;
-			}
-
-			.HeadWeb,
-			.HeadFamilies {
-
-				padding: 0 0 5px;
-			}
-			
-			.HeadWeb {
-
-				width: calc(50% - 70px);
-				border: solid #ccc;	
-				border-width: 0 0 1px;
-			}
-			
-			.HeadFamilies {
-
-				width: calc(50% - 70px);
-				border: solid #ccc;	
-				border-width: 0 0 1px;
-			}
+			width: 100%;
+			text-align: right;
+			box-sizing: border-box;
 		}
 
 		/* VIEWS */
 
 		.Views {
-
-			display: flex;
 			position: absolute;
-			top: 67px;
+			top: 40px;
 			right: 5px;
 			bottom: 5px;
-			left: 15px;
+			left: 15px;			
+
+			display: flex;
+			justify-content: space-between;
 
 			/* CATEGORIES */
 
-			.CategoriesTreeView {
+			.Categories {
 
-				width: calc(50% - 70px);
-			}
-			
-			.CategoriesTreeView .TreeViewItem {
+				width: calc(50% - 100px);
+				
+				.Head {
 
-				padding: 5px 10px;	
-				cursor: pointer;
+					padding: 0 0 5px;
+					border: solid #ccc;	
+					border-width: 0 0 1px;
+				}
+
+				.CategoriesTreeView { 
+					
+					.TreeViewItem {
+
+						padding: 5px 10px;	
+						cursor: pointer;
+					}
+				}
 			}
 
 			/* TOOLS */
@@ -72,26 +56,41 @@
 
 				width: 140px;
 				text-align: center;
+				padding-top: 25px;
 			}
 
 			/* FAMILIES */
 
-			.FamiliesListView {
+			.Families {
 
 				width: calc(50% - 70px);
-				overflow: auto;
 				
-				.ListViewItem {
+				.Head {
 
-					padding: 5px 10px;
-					margin: 5px;
-					border: solid #ccc 1px;	
-					cursor: pointer;
+					padding: 0 0 6px;
+					width: 100%;
+					white-space: nowrap; 
+					overflow: hidden;
+					text-overflow: ellipsis;
 				}
-				
-				&.Belongs {
 
-					background-color: #ff0;
+				.FamiliesListView {
+
+					overflow: auto;
+					height: calc(100% - 28px);
+					
+					.ListViewItem {
+
+						padding: 5px 10px;
+						margin: 5px;
+						border: solid #ccc 1px;	
+						cursor: pointer;
+					}
+					
+					&.Belongs {
+
+						background-color: #ff0;
+					}
 				}
 			}
 		}

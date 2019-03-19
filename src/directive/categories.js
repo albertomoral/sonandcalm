@@ -169,26 +169,25 @@ APP.directive(
       scope: true,
       controller: controller,
       template: `<div class="poeticsoft-woo-agora-categories">
-        <div class="Head">
-          <div class="Tools">
-            <button data-ng-click="revert()"
-                    ng-disabled="!TreeChanged"
-                    class="k-button">
-              Revert to saved
-            </button>
-            <button data-ng-click="save()"
-                    ng-disabled="!TreeChanged"
-                    class="k-button">
-              Save to web
-            </button>
-          </div>
-          <div class="HeadWeb">Web</div>
-          <div class="HeadFamilies">Families</div>
+        <div class="Tools">
+          <button data-ng-click="revert()"
+                  ng-disabled="!TreeChanged"
+                  class="k-button">
+            Revert to saved
+          </button>
+          <button data-ng-click="save()"
+                  ng-disabled="!TreeChanged"
+                  class="k-button">
+            Save to web
+          </button>
         </div>
         <div class="Views">
-          <div class="CategoriesTreeView"
-              kendo-tree-view="CategoriesTreeView"
-              k-options="CategoriesTreeViewConfig">
+          <div class="Categories">
+            <div class="Head">Web</div>
+            <div class="CategoriesTreeView"
+                kendo-tree-view="CategoriesTreeView"
+                k-options="CategoriesTreeViewConfig">
+            </div>
           </div>
           <div class="Tools">
             <button ng-click="updateRelations()"
@@ -197,9 +196,17 @@ APP.directive(
               Update Category
             </button>
           </div>
-          <div class="FamiliesListView"
-              kendo-list-view="FamiliesListView"
-              k-options="FamiliesListViewConfig">
+          <div class="Families">
+            <div class="Head">
+              Families 
+              <small>
+                (Ctrl + Click to unselect or multiple select)
+              </small>
+            </div>
+            <div class="FamiliesListView"
+                kendo-list-view="FamiliesListView"
+                k-options="FamiliesListViewConfig">
+            </div>
           </div>
         </div>
       </div>`

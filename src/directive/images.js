@@ -47,7 +47,7 @@ APP.directive(
 
       $scope.haveProduct = function(SKU) {
 
-        return Products.RemoteData[SKU] ? 'k-icon k-i-check-circle' : 'k-icon k-i-close-circle';
+        return Products.TempData[SKU] ? 'k-icon k-i-check-circle' : 'k-icon k-i-close-circle';
       }
 
       $scope.imageGridConfig = {
@@ -59,7 +59,7 @@ APP.directive(
           { 
             field: 'sku',
             title: '&nbsp',
-            groupHeaderTemplate: '<span class="Product {{ haveProduct(dataItem.sku) }}"></span>' +
+            groupHeaderTemplate: '<span class="Product {{ haveProduct(dataItem.value) }}"></span>' +
                                  '#= value # ' +
                                  '<span class="Count">[#= count #]</span>',                                 
             template: '&nbsp;',            
@@ -87,41 +87,7 @@ APP.directive(
             title: 'Date',
             format: '{0:M/d/yyyy h:mm tt}',
             width: '150px'
-          }/*
-          {
-            field: 'sku',
-            title: '&nbsp',
-            groupHeaderTemplate: '<span class="Product {{ haveProduct(dataItem.sku) }}"></span>' +
-                                 '#= value # ' +
-                                 '<span class="Count">[#= count #]</span>',
-            aggregates: ['count']
-          },
-          { 
-            field: 'sku',
-            title: 'SKU',
-            template: '<div class="{{ haveProduct(dataItem.sku) }}"></div>',
-            width: '65px',
-            attributes: {
-              class: 'Product'
-            }
-          },
-          { 
-            field: 'size',
-            title: 'Size',
-            width: '100px',
-            attributes: {
-              style:'text-align:right; vertical-align: top;'
-            } 
-          },        
-          { 
-            command: ['destroy'], 
-            title: '&nbsp;', 
-            width: '100px',
-            attributes: {
-              style:'vertical-align: top;'
-            }        
           }
-          */
         ],
         toolbar: [
           { 

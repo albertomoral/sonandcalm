@@ -12,28 +12,13 @@ function() {
     $timeout,
     $window, 
     Products, 
-    Categories
+    Categories,
+    Images
   ) {
 
     /* ----------------------------------------------------
       PRODUCT TREE LIST
     */
-
-    // Reload products
-
-    function revert() {        
-
-      $rootScope.$broadcast('opendialog', {
-        Title: 'Revert from WordPress..'
-      });
-      $rootScope.$emit('notifydialog', { text: 'Loading...' });
-
-      Products.RemoteDS.read()
-      .then(function() {
-
-        $rootScope.$emit('closedialog');
-      });
-    }
 
     // Render categories field with names
     
@@ -52,6 +37,11 @@ function() {
       })
       .join(' - ');
     } 
+
+    $scope.haveImages = function(SKU) {
+
+      return Images.Group[SKU] && Images.Group[SKU].count || 0;
+    }
 
     /* Columns config */
 
@@ -73,21 +63,6 @@ function() {
         width: 200,
         attributes: { class: 'Editable {{ dataItem.type }}' }
       },
-      /*
-      {
-        field: 'image_id',
-        title: 'Imagen',
-        width: 90
-      },
-      { 
-        title: 'Images',
-        template: '<div class="k-icon">{{ getProductImages(dataItem.sku) }}</div>',
-        width: '65px',
-        attributes: {
-          class: 'Images'
-        }
-      },
-      */
       {
         field: 'price',
         title: 'Price',
@@ -97,6 +72,12 @@ function() {
         field: 'stock_quantity',
         title: 'Stock',
         width: 90
+      },
+      {
+        field: 'image_id',
+        title: 'Image/s',
+        width: 70,
+        template: '<span class="Image">{{ haveImages(dataItem.sku) }}</span>'
       },
       {
         field: 'status',
@@ -119,20 +100,54 @@ function() {
         e.preventDefault();
       },
       columns: Columns,
+      /*
       pageable: {
         pageSize: 20,
         pageSizes: [20, 50, 'All']
       },
+      */
       toolbar: [
         {
           name: 'reload',
-          text: 'Reload',
+          text: 'Revert to last saved',
           click: revert
         },
         'excel',
-        'pdf'
+        'pdf',
+        {
+          name: 'savetoweb',
+          text: 'Update web',
+          click: saveToWeb
+        },
       ]
     }; 
+
+    /* ACTIONS */
+
+    // Reload products
+
+    function revert() {        
+
+      $rootScope.$broadcast('opendialog', {
+        Title: 'Revert from WordPress..'
+      });
+      $rootScope.$emit('notifydialog', { text: 'Loading...' });
+
+      Products.loadWebProducts()
+      .then(function() {
+
+        $rootScope.$emit('closedialog');
+      });
+    }
+
+    // Update web
+
+    function saveToWeb() {        
+
+      console.log('updateWeb');
+    }
+
+    /* Resize grid */
 
     function resize() {        
 

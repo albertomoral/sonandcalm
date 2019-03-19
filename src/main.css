@@ -222,7 +222,7 @@
       /* text-align: right; */
       padding: 5px; }
     .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content {
-      height: calc(100% - 115px) !important; }
+      height: calc(100% - 71px) !important; }
       .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content .k-icon.k-i-collapse {
         margin: -2px 2px 0 0; }
         .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content .k-icon.k-i-collapse:before {
@@ -244,17 +244,17 @@
           .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Status .k-icon.updated:before {
             content: "\e11a"; }
         .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Status .k-icon.changed {
-          color: #cc0; }
+          color: #ffac00; }
           .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Status .k-icon.changed:before {
-            content: "\e11a"; }
+            content: "\e403"; }
         .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Status .k-icon.new {
-          color: #cc0; }
+          color: #00b1ff; }
           .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Status .k-icon.new:before {
-            content: "\e11a"; }
+            content: "\e907"; }
         .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Status .k-icon.deleted {
-          color: #cc0; }
+          color: #c00; }
           .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Status .k-icon.deleted:before {
-            content: "\e11a"; }
+            content: "\e11c"; }
     .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-status {
       display: none; }
   .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView td.Editable.Variable,
@@ -268,53 +268,52 @@
   /* HEAD */
   /* VIEWS */
   /* FOOTER */ }
-  .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Head {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    padding: 0 0 0 15px; }
-    .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Head .Tools {
-      width: 100%;
-      text-align: right; }
-    .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Head .HeadWeb,
-    .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Head .HeadFamilies {
-      padding: 0 0 5px; }
-    .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Head .HeadWeb {
-      width: calc(50% - 70px);
-      border: solid #ccc;
-      border-width: 0 0 1px; }
-    .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Head .HeadFamilies {
-      width: calc(50% - 70px);
-      border: solid #ccc;
-      border-width: 0 0 1px; }
+  .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Tools {
+    width: 100%;
+    text-align: right;
+    box-sizing: border-box; }
   .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Views {
-    display: flex;
     position: absolute;
-    top: 67px;
+    top: 40px;
     right: 5px;
     bottom: 5px;
     left: 15px;
+    display: flex;
+    justify-content: space-between;
     /* CATEGORIES */
     /* TOOLS */
     /* FAMILIES */ }
-    .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Views .CategoriesTreeView {
-      width: calc(50% - 70px); }
-    .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Views .CategoriesTreeView .TreeViewItem {
-      padding: 5px 10px;
-      cursor: pointer; }
+    .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Views .Categories {
+      width: calc(50% - 100px); }
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Views .Categories .Head {
+        padding: 0 0 5px;
+        border: solid #ccc;
+        border-width: 0 0 1px; }
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Views .Categories .CategoriesTreeView .TreeViewItem {
+        padding: 5px 10px;
+        cursor: pointer; }
     .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Views .Tools {
       width: 140px;
-      text-align: center; }
-    .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Views .FamiliesListView {
-      width: calc(50% - 70px);
-      overflow: auto; }
-      .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Views .FamiliesListView .ListViewItem {
-        padding: 5px 10px;
-        margin: 5px;
-        border: solid #ccc 1px;
-        cursor: pointer; }
-      .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Views .FamiliesListView.Belongs {
-        background-color: #ff0; }
+      text-align: center;
+      padding-top: 25px; }
+    .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Views .Families {
+      width: calc(50% - 70px); }
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Views .Families .Head {
+        padding: 0 0 6px;
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis; }
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Views .Families .FamiliesListView {
+        overflow: auto;
+        height: calc(100% - 28px); }
+        .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Views .Families .FamiliesListView .ListViewItem {
+          padding: 5px 10px;
+          margin: 5px;
+          border: solid #ccc 1px;
+          cursor: pointer; }
+        .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Views .Families .FamiliesListView.Belongs {
+          background-color: #ff0; }
   .poeticsoft-woo-agora .poeticsoft-woo-agora-categories .Footer {
     position: absolute;
     right: 14px;

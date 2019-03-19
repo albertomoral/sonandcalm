@@ -148,7 +148,7 @@ function (
 	function mergeProductData() {
 
 		var SKU = Product['Código Barras'];
-		var RemoteProduct = Products.RemoteData[SKU];
+		var RemoteProduct = Products.WebData[SKU];
 		var Status = 'updated';
 		if(!RemoteProduct) { Status = 'new'; }
 		if(somethingChanged(RemoteProduct, Product)) {
@@ -194,8 +194,8 @@ function (
 	Self.process = function(RowsRange) {
 
 		var $Q = $q.defer();
-		
-		NewProductsData = {};
+
+		Products.NewData = {}; 
 		
 		$rootScope.$broadcast('opendialog', {
 			Title: 'Excel to Web Products',
@@ -212,37 +212,20 @@ function (
 			// Save list
 			.forEach(function(Product) {
 
-				NewProductsData[Product.sku] = Product;
+				Products.NewData[Product.sku] = Product;
 			});
-			
-			console.log(NewProductsData);
+		
+			$rootScope.$emit('notifydialog', { text: 'Calculating differences with web status' });
 
-			$rootScope.$emit('closedialog');
-			$Q.resolve();
+			$timeout(function() {
 
-			/*
+				Products.processDifferences();
 
-			$rootScope.$emit('notifydialog', { text: 'Updating web products list' });
+				$rootScope.$broadcast('closedialog');
 
-			$timeout(function() {	
-
-				var NewProductsStatus = ProductsData.map(formatProduct);
-
-				// Products.DS.read({ data: ProductsMapped });
+				$Q.resolve();
 				
-				$rootScope.$emit('notifydialog', { text: 'Web products list updated, go to Web > Products' });
-
-				$timeout(function() {	
-
-					$rootScope.$emit('closedialog');
-					$Q.resolve();
-
-				}, 1000);
-
 			}, 200);
-
-			*/
-
 		}, 200);
 
 		return $Q.promise;

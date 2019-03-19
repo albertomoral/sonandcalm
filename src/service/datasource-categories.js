@@ -7,7 +7,7 @@ function (
 ) {
 
 	var Self = {};
-	var RemoteData; // Buffer for construct tree		
+	var TreeData; // Buffer for construct tree		
 
 	// Data source for CategoriesTreeViewConfig in Categories directive
 
@@ -20,7 +20,7 @@ function (
 	function constructTree(Id) {
 
 		var ID = Id || 0;
-		var Nodes = RemoteData.filter(function(C) {
+		var Nodes = TreeData.filter(function(C) {
 
 			return C.parentId == ID;
 		});
@@ -60,7 +60,7 @@ function (
 		error: Notifications.showNotifications,
 		requestEnd: function(E) {
 
-			RemoteData = E.response.Data;
+			TreeData = E.response.Data;
 			Self.DS.data(constructTree()); // Feed Self.DS
 		}
 	});
