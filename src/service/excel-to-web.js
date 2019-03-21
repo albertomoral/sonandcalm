@@ -59,20 +59,31 @@ function (
 		var Parent = '';
 		var ParentId = 0;
 		var VarCount = 0;
+		var Color = {};
+		var Size = {};
 
 		ProductRows.forEach(function(ProductRow, Index) {
+
+			var SKU = ProductRow['Código Barras'];
 
 			ProductRow.Vars = 0;
 
 			if(ProductRow.Parent != Parent) {
 
 				ProductRows[FirstVariationIndex].Vars = VarCount;
+				ProductRows[FirstVariationIndex].Color = Object.keys(Color);
+				ProductRows[FirstVariationIndex].Size = Object.keys(Size);
 
 				VarCount = 0;
+				Color = [];
+				Size = [];
+
 				FirstVariationIndex = Index;
 				Parent = ProductRow.Parent;
-			}
+			}	
 
+			ColorSize.Data[SKU] && ColorSize.Data[SKU].color && (Color[ColorSize.Data[SKU].color] = '');
+			ColorSize.Data[SKU] && ColorSize.Data[SKU].size && (Size[ColorSize.Data[SKU].size] = '');
 			VarCount++;
 		});
 
@@ -80,12 +91,14 @@ function (
 		
 		ProductRows.forEach(function(ProductRow, Index) {
 
+			var SKU = ProductRow['Código Barras'];
+
 			if(ProductRow.Vars == 0) {
 
 				ProductRow.Type = 'variation';
 				ProductRow.Attributes = {
-					attribute_color: '',
-					attribute_size: ''
+					attribute_color: ColorSize.Data[SKU] && ColorSize.Data[SKU].color,
+					attribute_size: ColorSize.Data[SKU] && ColorSize.Data[SKU].size
 				}
 
 			} else {
@@ -93,18 +106,21 @@ function (
 				if(ProductRow.Vars == 1) {
 
 					ProductRow.Type = 'simple';
+					ProductRow.Attributes = {
+						attribute_color: ColorSize.Data[SKU] && ColorSize.Data[SKU].color,
+						attribute_size: ColorSize.Data[SKU] && ColorSize.Data[SKU].size
+					}
 
 				} else {
 
 					ProductRow.Type = 'variable';
 					ProductRow.Attributes = {
-						color: {},
-						size: {}
+						color: ProductRow.Color ,
+						size: ProductRow.Size
 					}
 				}
 			}
 
-			ProductRow.Images = Images.Group[ProductRow['Código Barras']] ? true : false;
 			ProductRow.Categories = Categories.FamilyCategories[ProductRow.Familia] || [];
 		});
 
@@ -132,37 +148,41 @@ function (
 	texto Boton: "GRIS OSCURO"
 	*/
 
-	function compareCategories(RemoteProductCategories, ProductCategories) {
-
-		var RC = [].concat(RemoteProductCategories).sort().join();
-		var PC = [].concat(ProductCategories).sort().join();
-		return RC != PC;
-	}
-
-	function somethingChanged(RemoteProduct, Product) {
-
-		return compareCategories(RemoteProduct.category_ids, Product.Categories) ||
-					 RemoteProduct
-	}
-
-	function mergeProductData() {
-
-		var SKU = Product['Código Barras'];
-		var RemoteProduct = Products.WebData[SKU];
-		var Status = 'updated';
-		if(!RemoteProduct) { Status = 'new'; }
-		if(somethingChanged(RemoteProduct, Product)) {
-
-			Status = 'changed';
-		}
-	}
-
 	function formatProduct(Product) {
 
 		var SKU = Product['Código Barras'];
+		var ProductImages = Images.Group[SKU] && 
+												Images.Group[SKU].items &&
+												Images.Group[SKU].items.map(function(Image) {
+
+													return Image.attid;
+												});
+		var ImageId;
+		var GalleryImageIds;
+		var VariationGalleryImages;
+
+		switch(Product.Type) {
+
+			case 'simple':
+			case 'variable':
+
+				ImageId = ProductImages && 
+									(ProductImages.length > 0 ) && 
+									ProductImages.shift();
+				GalleryImageIds = ProductImages && 
+												 (ProductImages.length > 0 ) &&
+													ProductImages;
+				break;
+
+			case 'variation':
+
+				VariationGalleryImages = ProductImages && 
+																(ProductImages.length > 0 ) &&
+																 ProductImages;
+				break;
+		}
 
 		return {
-
 			/* Calculated from Excel */
 			sku: SKU,
 			parent_sku: Product.Parent == SKU ? null : Product.Parent,
@@ -170,18 +190,15 @@ function (
 			name: Product.Producto,
 			category_ids: Product.Categories,
 			sale_price: Product['Precio General'],
-
 			/* Calculated from ColorSize */
 			attributes: {
-					attribute_color: ColorSize.Data[SKU] && ColorSize.Data[SKU].color || null,
-					attribute_size: ColorSize.Data[SKU] && ColorSize.Data[SKU].size || null
-			},
-			
+				attribute_color: ColorSize.Data[SKU] && ColorSize.Data[SKU].color || '',
+				attribute_size: ColorSize.Data[SKU] && ColorSize.Data[SKU].size || ''
+			},			
 			/* Calculated from Images */
-			image_id: Images.Group[SKU] && Images.Group[SKU].items[0].attid,
-			gallery_image_ids: [],
-			variation_gallery_images: [],			
-			
+			image_id: ImageId,
+			gallery_image_ids: GalleryImageIds,
+			variation_gallery_images: VariationGalleryImages,				
 			/* Calculated from Stock */
 			stock_quantity: 0
 		};

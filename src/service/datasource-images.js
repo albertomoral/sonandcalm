@@ -36,6 +36,7 @@ function (
 				id: 'name',
 				fields: {
 					ordername: { type: 'string', editable: false },
+					thumb: { type: 'string', editable: false },
 					name: { type: 'string', editable: false },
 					size: { type: 'string', editable: false },
 					date: { type: 'date', editable: false },

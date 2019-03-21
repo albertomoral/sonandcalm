@@ -16,11 +16,100 @@ function (
 
 	Self.WebData = {};
 	Self.NewData = {};
-	Self.TempData = {};
+	Self.TempData = {};	
+	
+	/*
 
-	function mergeData(SKU) {
-		
-		return false;
+	function compareCategories(RemoteProductCategories, ProductCategories) {
+
+		var RC = [].concat(RemoteProductCategories).sort().join();
+		var PC = [].concat(ProductCategories).sort().join();
+		return RC != PC;
+	}
+
+	function somethingChanged(RemoteProduct, Product) {
+
+		return compareCategories(RemoteProduct.category_ids, Product.Categories) ||
+					 RemoteProduct
+	}
+
+	function mergeProductData() {
+
+		var SKU = Product['Código Barras'];
+		var RemoteProduct = Products.WebData[SKU];
+		var Status = 'updated';
+		if(!RemoteProduct) { Status = 'new'; }
+		if(somethingChanged(RemoteProduct, Product)) {
+
+			Status = 'changed';
+		}
+	}
+	*/
+
+	var PlainCompares = [
+		'parent_sku',
+		'type',
+		'name',
+		'image_id',
+		'sale_price',
+		'stock_quantity'
+	]
+
+	var ArrayCompares = [
+		'category_ids',
+		'gallery_image_ids',
+		'variation_gallery_images'
+	]
+
+	function updateData(SKU) {
+
+		/* Plain */
+
+		PlainCompares.forEach(function(Field) {
+
+			if(
+				Self.WebData[SKU][Field] != 
+				Self.NewData[SKU][Field]
+			) {
+
+				Self.TempData[SKU][Field] = Self.NewData[SKU][Field];
+				Self.TempData[SKU].status = 'changed';
+			}
+		});
+
+		/* Arrays */
+
+		ArrayCompares.forEach(function(Field) {
+
+			if(
+				[].concat(Self.WebData[SKU][Field]).sort().join() != 
+				[].concat(Self.NewData[SKU][Field]).sort().join()
+			) {
+
+				Self.TempData[SKU][Field] = Self.NewData[SKU][Field];
+				Self.TempData[SKU].status = 'changed';
+			}
+		});
+
+		/* Attributes */
+
+		if(
+			Self.WebData[SKU].attributes.attribute_color != 
+			Self.NewData[SKU].attributes.attribute_color
+		) {
+
+			Self.TempData[SKU].attributes.attribute_color = Self.NewData[SKU].attributes.attribute_color;
+			Self.TempData[SKU].status = 'changed';
+		}		
+
+		if(
+			Self.WebData[SKU].attributes.attribute_size != 
+			Self.NewData[SKU].attributes.attribute_size
+		) {
+
+			Self.TempData[SKU].attributes.attribute_size = Self.NewData[SKU].attributes.attribute_size;
+			Self.TempData[SKU].status = 'changed';
+		}
 	}
 
 	Self.processDifferences = function() {
@@ -46,9 +135,9 @@ function (
 
 			if(!Self.WebData[SKU]) { Self.TempData[SKU].status = 'new'; }				
 
-			/* Mark as changed if is in web but different */
+			/* Update if changed */
 
-			else { if(mergeData(SKU)){ Self.TempData[SKU].status = 'changed'; } }
+			else { updateData(SKU); }
 
 		});
 
@@ -62,13 +151,13 @@ function (
 		});
 
 		Self.DS.read({ data: TempData });
+
+		$rootScope.$broadcast('productschanged');
 	}
 
 	/* Data structure for visualization */
 
 	Self.DS = new kendo.data.TreeListDataSource ({
-		// page: 1,
-		// pageSize: 20,
 		transport: {
 			read: function(Op) {
 
@@ -80,25 +169,35 @@ function (
 				id: 'sku',
 				parentId: 'parent_sku',
 				fields: {
+					/* Calculated from Excel */
 					'sku': { type: 'string', editable: false },
 					'parent_sku': { type: 'string', editable: false, nullable: true },
 					'type': { type: 'string', editable: false },
 					'name': { type: 'string', editable: false, expanded: false },
-					'category_ids': [],
-					'image_id': { type: 'number', editable: false },
-					'price': { type: 'number', editable: false },
+					'category_ids': [],	
 					'sale_price': { type: 'number', editable: false },
+					/* Calculated from ColorSize */
+					'attributes': {
+						'attribute_color': '',
+						'attribute_size': ''
+					},
+					/* Calculated from Images */
+					'image_id': { type: 'number', editable: false },
+					'gallery_image_ids': [],					
+					'variation_gallery_images': [],	
+					/* Calculated from Stock */	
 					'stock_quantity': { type: 'number', editable: false },
+					/* Mark */	
 					'status': { type: 'string', editable: false } // 'updated', 'deleted', 'new', 'changed'
 				},
-				expanded: true
+				expanded: false
 			}
 		}
 	});
 
 	/* Load Web Products Data */
 
-	Self.loadWebProducts = function() {
+	Self.loadFromWeb = function() {
 
 		var $Q = $q.defer();
 
@@ -119,10 +218,10 @@ function (
 				Response.data.Data.forEach(function(Product) {
 
 					Product.status = 'updated';
-					Self.WebData[Product.sku] = Product;
+					Self.WebData[Product.sku] = Product;				
 				});
 
-				/* Visuaize */
+				/* Visualize */
 
 				Self.DS.read({ data: Response.data.Data });
 			}
@@ -130,7 +229,73 @@ function (
 
 		return $Q.promise;
 	}
-	Self.loadWebProducts();
+
+	/* Save conversion to web and update woo products */
+
+	var ProcessFragments;	
+	var ProcessFragmentsOrdered = [
+		'deleted_variation',	
+		'deleted_variable',
+		'deleted_simple',
+		'new_simple',
+		'new_variable',
+		'new_variation',
+		'changed_simple',
+		'changed_variable',
+		'changed_variation'	
+	];
+
+	Self.saveToWeb = function() {
+
+		var $Q = $q.defer();
+
+		/* same as Self.TempData because may be in a future grid will be editable */
+		var ProductsData = Self.DS.data().toJSON();
+
+		var Chain = $q.when();
+		var Count = 0;
+		
+		ProcessFragmentsOrdered 
+		.forEach(function(Key) {
+
+			var Code = Key.split('_');
+			var Status = Code[0];
+			var Type = Code[1];
+			var ProductList = ProductsData.filter(function(Product) {
+
+				return Product.status == Status &&
+							 Product.type == Type;
+			});
+			
+			Chain.then(function(Response) {
+
+        return $http.post(
+					'/wp-json/poeticsoft/woo-products-process',
+					{ 
+						mode: Key,
+						products: ProductList
+					}
+				)
+				.then(function(Response) {
+					
+					Count++;
+					if(Count == ProcessFragmentsOrdered.length) {										
+
+						$Q.resolve();
+					}
+				
+					if(Response.data.Status.Code == 'KO') {	
+
+						return Notifications.show({ errors: Response.data.Status.Reason });						
+					}
+					
+					$rootScope.$emit('notifydialog', { text: Response.data.Status.Message }); 
+				});
+      });
+		});
+
+		return $Q.promise;
+	}
 
 	/* Load Excel FootPrint */
 
@@ -148,7 +313,9 @@ function (
 
 			Self.FootPrint = Response.data.Data;
 		}
-	);	
+	);
+	
+	Self.loadFromWeb();
 
 	return Self;
 });

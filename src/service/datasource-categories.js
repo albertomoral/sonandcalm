@@ -7,6 +7,9 @@ function (
 ) {
 
 	var Self = {};
+
+	/* WEB CATEGORIES */
+	
 	var TreeData; // Buffer for construct tree		
 
 	// Data source for CategoriesTreeViewConfig in Categories directive
@@ -102,6 +105,7 @@ function (
 	Self.updateFamilies = function(FamiliesList) {
 
 		// Remove inexistent families
+
 		var RemoveIndex = [];
 		Self.RelationsDS
 		.data()
@@ -115,6 +119,7 @@ function (
 		});
 
 		// Add new families
+
 		FamiliesList.forEach(function(Family) {
 
 			var FamilyExistent = Self.RelationsDS.get(Family);

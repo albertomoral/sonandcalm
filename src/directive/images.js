@@ -10,7 +10,8 @@ APP.directive(
       Notifications, 
       Products,
       Images, 
-      $window
+      $window,
+      $element
     ) {
 
       /* UPLOAD */
@@ -69,9 +70,12 @@ APP.directive(
           { 
             field: 'image', 
             title: '&nbsp;',
-            template: '<img src="/wp-content/uploads/product-images/#: name  #?#= Math.round(Math.random() * 1000) #" ' +
+            template: '<img src="/wp-content/uploads/product-images/#: thumb  #?#= Math.round(Math.random() * 1000) #" ' +
                            'style="display: block; width:100%;"/>',           
-            width: '100px'
+            width: '100px',          
+            attributes: {
+              style: 'padding: 0; border-width: 1px 0 0 0;'
+            }
           },
           { 
             field: 'attid',
@@ -168,6 +172,10 @@ APP.directive(
               Notifications.show({ errors: Response.data.Status.Reason });
             }
           });
+
+          $($element)
+          .find('.k-widget.k-upload.k-header')
+          .prepend($('<span>You can drag and drop images here (jpg, gif, png)</span>'));
         }
       });
     }

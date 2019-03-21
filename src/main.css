@@ -337,9 +337,23 @@
         right: 10px;
         top: 5px;
         z-index: 1; }
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-images .Images .Upload.k-dropzone-active em {
+        display: none; }
       .poeticsoft-woo-agora .poeticsoft-woo-agora-images .Images .Upload .k-upload {
         height: 100%;
         position: relative; }
+        .poeticsoft-woo-agora .poeticsoft-woo-agora-images .Images .Upload .k-upload > span {
+          position: absolute;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 40px; }
+          .poeticsoft-woo-agora .poeticsoft-woo-agora-images .Images .Upload .k-upload > span.k-dropzone-hovered {
+            background-color: #00cc0066; }
         .poeticsoft-woo-agora .poeticsoft-woo-agora-images .Images .Upload .k-upload .k-dropzone {
           padding: 5px; }
           .poeticsoft-woo-agora .poeticsoft-woo-agora-images .Images .Upload .k-upload .k-dropzone .k-upload-status {

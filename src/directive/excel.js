@@ -262,6 +262,10 @@ APP.directive(
 						$timeout(function() {
 
 							$rootScope.$emit('closedialog');
+
+							/* DEBUG*/
+							$scope.generateWebProducts();
+							
 						}, 200);
 
 					} else {

@@ -24,10 +24,7 @@ function() {
     
     $scope.getCategories = function(DataItem) {
 
-      if(!DataItem.category_ids) {
-
-        return '';        
-      }
+      if(!DataItem.category_ids) { return ''; }
 
       return DataItem.category_ids.toJSON().map(function(ID) {
 
@@ -94,58 +91,66 @@ function() {
       dataSource: Products.DS,
       sortable: true,
       resizable: true, 
-      autoBind: false,     
-      collapse: function(e) {
-        
-        e.preventDefault();
-      },
+      autoBind: false, 
       columns: Columns,
-      /*
-      pageable: {
-        pageSize: 20,
-        pageSizes: [20, 50, 'All']
-      },
-      */
       toolbar: [
         {
           name: 'reload',
           text: 'Revert to last saved',
-          click: revert
+          imageClass: 'k-icon k-i-undo Revert',
+          click: revertFromWeb
         },
-        'excel',
-        'pdf',
         {
           name: 'savetoweb',
           text: 'Update web',
+          imageClass: 'k-icon k-i-save Save',
           click: saveToWeb
-        },
+        }
       ]
     }; 
 
-    /* ACTIONS */
+    /* Tool bar */
 
-    // Reload products
+    var $RevertButton;
+    var $SaveButon;
 
-    function revert() {        
+    function revertFromWeb() {       
 
       $rootScope.$broadcast('opendialog', {
         Title: 'Revert from WordPress..'
       });
-      $rootScope.$emit('notifydialog', { text: 'Loading...' });
+      $rootScope.$emit('notifydialog', { text: 'Loading...' }); 
 
-      Products.loadWebProducts()
+      Products.loadFromWeb()
       .then(function() {
 
+        $RevertButton.prop('disabled', true);
+        $SaveButton.prop('disabled', true);
         $rootScope.$emit('closedialog');
       });
     }
 
-    // Update web
+    function saveToWeb() {     
 
-    function saveToWeb() {        
+      $rootScope.$broadcast('opendialog', {
+        Title: 'Saving to WordPress..'
+      });
+      $rootScope.$emit('notifydialog', { text: 'Saving...' }); 
 
-      console.log('updateWeb');
-    }
+      Products.saveToWeb()
+      .then(function() {
+
+        // $RevertButton.prop('disabled', true);
+        // $SaveButton.prop('disabled', true);
+        $rootScope.$emit('closedialog');
+      });
+    }    
+
+		$scope.$on('productschanged', function() {        
+
+      $RevertButton.prop('disabled', false);
+      $SaveButton.prop('disabled', false);
+    });
 
     /* Resize grid */
 
@@ -157,7 +162,15 @@ function() {
     $scope.$on("kendoWidgetCreated", function(event, widget){
       
       if (widget === $scope.ProductKendoTreeList) {
-        
+
+        var $GridElement = $($scope.ProductKendoTreeList.element);
+
+        $RevertButton = $GridElement.find('.k-grid-toolbar button[data-command="reload"]');
+        $SaveButton = $GridElement.find('.k-grid-toolbar button[data-command="savetoweb"]');
+
+        $RevertButton.prop('disabled', true);
+        $SaveButton.prop('disabled', true);
+
         resize();
       }
     });
