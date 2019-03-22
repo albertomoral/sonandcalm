@@ -10,9 +10,9 @@ APP.directive(
 			$scope,
 			$timeout,
 			Notifications,
+			ExcelToWeb,
 			Products,
-			ColorSize,
-			ExcelToWeb
+			ColorSize
 		) {
 			
 			$scope.allowProcessing = false;
@@ -228,7 +228,7 @@ APP.directive(
 				parseRow();
 			}
 
-			/* Load excel saved */
+			/* Load last excel saved */
 
 			$scope.loadData = function() {				
 
@@ -243,6 +243,17 @@ APP.directive(
 
 					var Code = Response.data.Status.Code;
 					if(Code == 'OK'){ 
+
+						if(Response.data.Data.length == 0) {
+
+							$rootScope.$emit('notifydialog', { text: 'No data' });
+
+							return $timeout(function() {
+
+								$rootScope.$emit('closedialog');
+								
+							}, 200);
+						}
 
 						var ProductsSheetData = Response.data.Data;
 						delete ProductsSheetData.activeCell;
@@ -263,8 +274,8 @@ APP.directive(
 
 							$rootScope.$emit('closedialog');
 
-							/* DEBUG*/
-							$scope.generateWebProducts();
+							/* DEBUG
+							$scope.generateWebProducts(); */
 							
 						}, 200);
 
@@ -282,12 +293,35 @@ APP.directive(
 				$rootScope.$broadcast('opendialog', {
 					Title: 'Saving Excel data'
 				});
+
+				var Data = {
+					ProductsSheetData: ProductsSheet.toJSON(),
+					ColorSizeData: {},
+					ParentSKUData: {}
+				};
 				
-				$rootScope.$emit('notifydialog', { text: 'Saving data...' });
+				$rootScope.$emit('notifydialog', { text: 'Extracting parent, color and size...' });
+
+				Data.ProductsSheetData.rows.forEach(function(Row) {
+
+					comnsole.log();
+
+					var Parent = Row.cells[Products.FootPrint.ForData.ParentIndex].value;
+					var SKU = Row.cells[Products.FootPrint.ForData.SKUIndex].value;
+					var Color = Row.cells[Products.FootPrint.ForData.ColorIndex].value;
+					var Size = Row.cells[Products.FootPrint.ForData.SizeIndex].value;
+
+					Data.ColorSizeData[SKU] = {
+						Color: Color,
+						Size: Size
+					};
+
+					Data.ParentSKUData[SKU] = Parent;
+				});
 
 				$http.post(
 					'/wp-json/poeticsoft/woo-agora-excel-data-update',
-					ProductsSheet.toJSON()
+					Data
 				)
 				.then(function(Response) {
 
@@ -312,7 +346,7 @@ APP.directive(
 				
 				$scope.allowProcessing = false;
 				var RowsRange = ProductsSheet.range('A2:' + Products.FootPrint.ForTree.SizeCellIndex + RowCount);					
-				ExcelToWeb.process(RowsRange)
+				ExcelToWeb.processExcelData(RowsRange)
 				.finally(function() {				
 				
 					$scope.allowProcessing = true;

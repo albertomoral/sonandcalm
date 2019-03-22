@@ -45,7 +45,13 @@
 						}
 					}
 
-					td.Images {
+					td.Data {
+
+						cursor: help;
+						text-align: center;
+					}
+
+					td.Image {
 						
 						text-align: center;
 
@@ -130,6 +136,43 @@
 				background-color: #eff5dc66;
 				cursor: pointer;
 			}
+		}
+	}
+}
+
+.DataToolTip {
+
+	text-align: left;
+	background-color: #fff;
+	color: #888;
+	padding: 10px;
+
+	.Field {
+
+		border: solid #ccc;
+		border-width: 0 0 1px 0;
+		padding: 5px 0;
+
+		&:last-child {
+
+			border-width: 0;
+		}
+
+		.Name,
+		.Value {
+
+			display: inline-block;
+			vertical-align: top;
+		}
+
+		.Name {
+
+			width:40%;
+		}
+
+		.Value {
+
+			width: 55%
 		}
 	}
 }

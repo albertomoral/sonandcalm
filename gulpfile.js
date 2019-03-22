@@ -47,6 +47,8 @@ gulp.task('compile_sonandcalm', ['compile_scss'], function() {
 		'../bower_components/kendo-ui/js/angular.min.js',
 		'../bower_components/kendo-ui/js/kendo.all.min.js',
 		'../bower_components/jszip/dist/jszip.min.js',
+		
+		'../bower_components/lodash/dist/lodash.min.js',
 
 		'./src/module.js',
 

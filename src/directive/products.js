@@ -11,6 +11,7 @@ function() {
     $scope, 
     $timeout,
     $window, 
+    ExcelToWeb,
     Products, 
     Categories,
     Images
@@ -19,21 +20,6 @@ function() {
     /* ----------------------------------------------------
       PRODUCT TREE LIST
     */
-
-    // Render categories field with names
-    
-    $scope.getCategories = function(DataItem) {
-
-      if(!DataItem.category_ids) { return ''; }
-
-      return DataItem.category_ids.toJSON().map(function(ID) {
-
-        var Categorie = Categories.DS.get(ID);
-        var Text = Categorie ? Categorie.get('name') : 'Error';
-        return Text;
-      })
-      .join(' - ');
-    } 
 
     $scope.haveImages = function(SKU) {
 
@@ -49,32 +35,26 @@ function() {
         title: 'Name'
       },
       {
+        field: 'type',
+        title: 'Type',
+        width: 100
+      },
+      {
         field: 'sku',
         title: 'SKU',
         width: 200
       },
       {
-        field: 'category_ids',
-        title: 'Categories',
-        template: '{{ getCategories(dataItem) }}',
-        width: 200,
-        attributes: { class: 'Editable {{ dataItem.type }}' }
+        title: 'Data',
+        width: 45,
+        template: '<i class="k-icon k-i-question"></i>',
+        attributes: { class: 'Data' }
       },
       {
-        field: 'price',
-        title: 'Price',
-        width: 90
-      },
-      {
-        field: 'stock_quantity',
-        title: 'Stock',
-        width: 90
-      },
-      {
-        field: 'image_id',
         title: 'Image/s',
         width: 70,
-        template: '<span class="Image">{{ haveImages(dataItem.sku) }}</span>'
+        template: '{{ haveImages(dataItem.sku) }}',
+        attributes: { class: 'Image' }
       },
       {
         field: 'status',
@@ -102,7 +82,7 @@ function() {
         },
         {
           name: 'savetoweb',
-          text: 'Update web',
+          text: 'Update web products',
           imageClass: 'k-icon k-i-save Save',
           click: saveToWeb
         }
@@ -128,7 +108,7 @@ function() {
         $SaveButton.prop('disabled', true);
         $rootScope.$emit('closedialog');
       });
-    }
+    } 
 
     function saveToWeb() {     
 
@@ -140,8 +120,8 @@ function() {
       Products.saveToWeb()
       .then(function() {
 
-        // $RevertButton.prop('disabled', true);
-        // $SaveButton.prop('disabled', true);
+        $RevertButton.prop('disabled', true);
+        $SaveButton.prop('disabled', true);
         $rootScope.$emit('closedialog');
       });
     }    
@@ -158,6 +138,55 @@ function() {
 
       $scope.ProductKendoTreeList.resize();
     }
+    /* Data tooltip */
+
+    function dataContent(E) {
+
+      var Row = $(E.target).parents('tr');
+
+      if(Row.length == 0) {
+
+        return;
+      }
+
+      var RowData = $scope.ProductKendoTreeList.dataItem(Row.eq(0)).toJSON();
+      var TooltipContent = '<div class="DataToolTip">';
+      Object.keys(RowData)
+      .forEach(function(Key) {
+
+        var Field = RowData[Key];
+
+        if(Field) {
+
+          if(Key == 'category_ids') {
+
+            Field = Field.map(function(ID) {
+
+              var Categorie = Categories.DS.get(ID);
+              var Text = Categorie ? Categorie.get('name') : 'Error';
+              return Text;
+            })
+            .join(' - ');
+          }
+
+          if(
+            Key == 'attributes' ||
+            Key == 'variations'
+          ) {
+
+            Field = JSON.stringify(Field, null, 4);
+          }
+
+          TooltipContent += `<div class="Field">
+            <span class="Name">${ Key }</span>
+            <span class="Value">${ Field }</span>
+          </div>`
+        }
+      })
+      TooltipContent += '</div>';
+
+      return TooltipContent;
+    }
 
     $scope.$on("kendoWidgetCreated", function(event, widget){
       
@@ -170,6 +199,40 @@ function() {
 
         $RevertButton.prop('disabled', true);
         $SaveButton.prop('disabled', true);
+
+        var DataTooltip = $GridElement
+        .find('.k-grid-content')
+        .kendoTooltip({
+          width: 450,
+          position: 'left',
+          content: dataContent,
+          animation: {
+            open: {
+              effects: 'zoom',
+              duration: 150
+            }
+          }
+        }).data('kendoTooltip');
+
+        DataTooltip.hide();
+
+        $GridElement
+        .on(
+          'mouseenter',
+          '.Data',
+          function() {
+
+            DataTooltip.show($(this));
+          }
+        )
+        .on(
+          'mouseleave',
+          '.Data',
+          function() {
+
+            // DataTooltip.hide();
+          }
+        );
 
         resize();
       }

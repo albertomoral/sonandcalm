@@ -202,6 +202,9 @@
         box-sizing: border-box; }
     .poeticsoft-woo-agora .poeticsoft-woo-agora-excel .SpreadsheetView .k-spreadsheet .k-tabstrip-items {
       padding: 1px 20px 0; }
+    .poeticsoft-woo-agora .poeticsoft-woo-agora-excel .SpreadsheetView .k-spreadsheet .k-state-disabled {
+      opacity: 1;
+      color: #bbb; }
 
 /* _products.scss */
 .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView {
@@ -227,12 +230,15 @@
         margin: -2px 2px 0 0; }
         .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content .k-icon.k-i-collapse:before {
           content: "\e525"; }
-      .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Images {
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Data {
+        cursor: help;
         text-align: center; }
-        .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Images div:empty:before {
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Image {
+        text-align: center; }
+        .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Image div:empty:before {
           content: "\e11d";
           color: #c50000; }
-        .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Images div:not(:empty) {
+        .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Image div:not(:empty) {
           text-indent: 0;
           font: inherit;
           width: auto;
@@ -261,6 +267,26 @@
   .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView td.Editable.Simple {
     background-color: #eff5dc66;
     cursor: pointer; }
+
+.DataToolTip {
+  text-align: left;
+  background-color: #fff;
+  color: #888;
+  padding: 10px; }
+  .DataToolTip .Field {
+    border: solid #ccc;
+    border-width: 0 0 1px 0;
+    padding: 5px 0; }
+    .DataToolTip .Field:last-child {
+      border-width: 0; }
+    .DataToolTip .Field .Name,
+    .DataToolTip .Field .Value {
+      display: inline-block;
+      vertical-align: top; }
+    .DataToolTip .Field .Name {
+      width: 40%; }
+    .DataToolTip .Field .Value {
+      width: 55%; }
 
 /* _categories.scss */
 .poeticsoft-woo-agora .poeticsoft-woo-agora-categories {

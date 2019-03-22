@@ -5,8 +5,7 @@ APP.factory(
 function (
 	$http,
 	$q, 
-	$rootScope, 
-	$timeout, 
+	$rootScope,
 	Notifications
 ) {
 
@@ -17,34 +16,6 @@ function (
 	Self.WebData = {};
 	Self.NewData = {};
 	Self.TempData = {};	
-	
-	/*
-
-	function compareCategories(RemoteProductCategories, ProductCategories) {
-
-		var RC = [].concat(RemoteProductCategories).sort().join();
-		var PC = [].concat(ProductCategories).sort().join();
-		return RC != PC;
-	}
-
-	function somethingChanged(RemoteProduct, Product) {
-
-		return compareCategories(RemoteProduct.category_ids, Product.Categories) ||
-					 RemoteProduct
-	}
-
-	function mergeProductData() {
-
-		var SKU = Product['Código Barras'];
-		var RemoteProduct = Products.WebData[SKU];
-		var Status = 'updated';
-		if(!RemoteProduct) { Status = 'new'; }
-		if(somethingChanged(RemoteProduct, Product)) {
-
-			Status = 'changed';
-		}
-	}
-	*/
 
 	var PlainCompares = [
 		'parent_sku',
@@ -190,8 +161,12 @@ function (
 					/* Mark */	
 					'status': { type: 'string', editable: false } // 'updated', 'deleted', 'new', 'changed'
 				},
-				expanded: false
+				expanded: true
 			}
+		},
+		sort: { 
+			field: 'sku', 
+			dir: 'asc' 
 		}
 	});
 
@@ -314,6 +289,8 @@ function (
 			Self.FootPrint = Response.data.Data;
 		}
 	);
+
+	/* Load last products processed data */
 	
 	Self.loadFromWeb();
 

@@ -30,11 +30,11 @@ function() {
 		template: `<div class="poeticsoft-woo-agora">
 			<div kendo-tab-strip>
 				<ul>
-					<!-- li>Color Size</li -->
-					<li>Agora</li>
-					<li class="k-state-active">Web</li>
+					<li>Color Size</li>
+					<li class="k-state-active">Agora</li>
+					<li>Web</li>
 				</ul>                      
-				<!-- poeticsoft-woo-agora-color-size></poeticsoft-woo-agora-color-size -->                 
+				<poeticsoft-woo-agora-color-size></poeticsoft-woo-agora-color-size>                 
 				<poeticsoft-woo-agora-excel></poeticsoft-woo-agora-excel> 
 				<div class="Web">
 					<div kendo-tab-strip>
