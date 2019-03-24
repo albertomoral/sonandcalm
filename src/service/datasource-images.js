@@ -3,9 +3,6 @@
 APP.factory(
 	'Images', 
 function (
-	$q, 
-	$rootScope, 
-	$timeout, 
 	Notifications
 ) {
 

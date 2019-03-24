@@ -14,6 +14,148 @@ function (
 	
 	var Self = {};
 
+	/* Utils */
+
+	function formatName(Name) {
+
+		return Name.split(' ')
+							 .map(function(Word) {
+
+								return _.upperFirst(Word.toLowerCase());
+							})
+							.join(' ');
+	}
+
+	/* format Excel Columns to Woo struct */
+
+	function formatProduct(Product) {
+
+		var SKU = Product['Código Barras'];
+
+		return {
+			/* Calculated from Excel */
+			sku: SKU,
+			parent_sku: Product.Parent,
+			type: Product.Type,
+			name: Product.Producto,
+			category_ids: Product.Categories,
+			sale_price: Product['Precio General'],
+			/* Calculated from ColorSize */
+			attributes: {
+				attribute_color: Product.Attributes && Product.Attributes.Color,
+				attribute_size: Product.Attributes && Product.Attributes.Size
+			},	
+			/* Calculated from Images */
+			image_id: Product.ImageId,
+			gallery_image_ids: Product.GalleryImageIds,
+			variation_gallery_images: Product.VariationGalleryImages,				
+			/* Calculated from Stock */
+			stock_quantity: 1
+		};
+	}
+
+	/* Add simple product */
+
+	function addSimpleProduct(Group) {
+
+		var Product = Group[0];
+		var SKU = Product['Código Barras'];	
+		var ProductImages = Images.Group[SKU] && 
+												Images.Group[SKU].items &&
+												Images.Group[SKU].items.map(function(Image) {
+
+													return Image.attid;
+												});
+
+		Product.Parent = null;
+		Product.Type = 'simple';
+		Product.Producto = formatName(Product.Producto);
+		Product.Categories = Categories.FamilyCategories[Product.Familia] || [];
+		Product.Attributes = {
+			Color: ColorSize.Data[SKU] && ColorSize.Data[SKU].color || '',
+			Size: ColorSize.Data[SKU] && ColorSize.Data[SKU].size || ''
+		};
+		Product.ImageId = ProductImages && 
+										 (ProductImages.length > 0 ) && 
+										  ProductImages.shift();
+		Product.GalleryImageIds = ProductImages && 
+														 (ProductImages.length > 0 ) &&
+															ProductImages;
+
+		Products.NewData[SKU] = formatProduct(Product);
+	}
+
+	/* Add variable product */
+
+	function addVariableProduct(Group, SKU) {
+
+		var Product = {
+			Parent: null,
+		 'Código Barras': SKU,
+			Type: 'variable'
+		}
+
+		/* Name as minimun common from variations */
+
+		Product.Producto = _.intersection(...Group.map(function(P) {
+			
+			return P.Producto.split(' ');
+		})).filter(function(Part) {
+
+			return Part != 'CM' ||
+										 'M' ||
+										 'PERFIL' || 
+										 'SEDA+' || 
+										 'ALGODON+BAMBU' ||
+										 'cm'
+		})
+		.map(function(Word) {
+
+			return _.upperFirst(Word.toLowerCase());
+		})
+		.join(' ');
+
+		/* Categories as unique from variations (because family in variations can change?) */
+
+		Product.Categories = _.union(Group.map(function(P) {
+
+			return Categories.FamilyCategories[P.Familia] || [];
+		}));
+
+		/* Variations as uniq sum of color & Size of variations */
+
+		Product.Variations = {
+			Color: _.uniq(Group.map(function(P) { return P.Color; })).join('|'),
+			Size: _.uniq(Group.map(function(P) { return P.Size; })).join('|')
+		}
+
+		/* Add variable product */
+
+		Products.NewData[SKU] = formatProduct(Product);	
+
+		/* Variations */
+
+		Group.forEach(addVariationProduct);
+	}
+
+	/* Add variation product */
+
+	function addVariationProduct(Product) {
+
+		var SKU = Product['Código Barras'];
+
+		Product.Type = 'variation';		
+		Product.Producto = formatName(Product.Producto);
+		Product.Attributes = {
+			Color: Product.Color || '',
+			Size: Product.Size || ''
+		}
+
+		/* Add variation product */
+
+		Products.NewData[SKU] = formatProduct(Product);	
+	}
+
 	/* Excel rows to Product List Struct */
 
 	function digestRange(RowsRange) {
@@ -44,196 +186,33 @@ function (
 
 		Categories.updateFamilies(Object.keys(Families));
 
-		/* order based in parent to calculate variations */
+		/* Initialize NewData array */
 
-		ProductRows.sort(function(a, b) {
+		Products.NewData = {};
 
-			if (a.Parent < b.Parent) { return -1; }
-			if (a.Parent > b.Parent) { return 1; };
-			return 0;
+		/* Group by Parent to create variations */
+
+		var ProductParentGroups = _.groupBy(ProductRows, function(Row) {
+
+			return Row.Parent;
 		});
 
-		/* Calculate Variations */
-
-		var FirstVariationIndex = 0;
-		var Parent = '';
-		var VarCount = 0;
-		var Color = {};
-		var Size = {};
-		var Names = [];
-
-		ProductRows.forEach(function(ProductRow, Index) {
-
-			var SKU = ProductRow['Código Barras']; 
-			var Code = SKU.split('.');
-					
-			ProductRow.SKUParent = Code[0] + '.' + Code[1] + '.' + Code[2];
-			ProductRow.Type = 'variation';
-
-			if(ProductRow.Parent != Parent) {
-
-				// Variable > +Name > + Attributes
-
-				if(VarCount > 1) {
-					var Name = _.intersection(...Names)
-											.filter(function(Part) {
-
-												return Part != 'CM' ||
-																			 'M' ||
-																			 'PERFIL' || 
-																			 'SEDA+' || 
-																			 'ALGODON+BAMBU' ||
-																			 'cm'
-											})
-											.map(function(Word) {
-
-												return _.upperFirst(Word.toLowerCase());
-											})
-											.join(' ');
-
-					ProductRows[FirstVariationIndex].Type = 'variable'; 
-					ProductRows[FirstVariationIndex].Name = Name;
-
-				} else if(VarCount == 1) { 
-
-					ProductRows[FirstVariationIndex].Type = 'simple'; 
-				}
-
-				ProductRows[FirstVariationIndex].Variations = {
-					Color: Object.keys(Color),
-					Size: Object.keys(Size)
-				};
-
-				/* Initializa accumulators */
-
-				VarCount = 0;
-				Color = [];
-				Size = [];
-				FirstVariationIndex = Index;
-				Parent = ProductRow.Parent;
-				Names = [];
-
-			}	
-
-			/* Accumulate names */
-
-			Names.push(ProductRow.Producto.split(' '));
-
-			/* Accumulate variations */
-
-			VarCount++;
-
-			ColorSize.Data[SKU] && ColorSize.Data[SKU].color && (Color[ColorSize.Data[SKU].color] = '');
-			ColorSize.Data[SKU] && ColorSize.Data[SKU].size && (Size[ColorSize.Data[SKU].size] = '');
+		Object.keys(ProductParentGroups)
+		.forEach(function(ParentSKU) {
 			
-			/* Attributes */
-
-			ProductRow.Attributes = {
-				Color: ColorSize.Data[SKU] && ColorSize.Data[SKU].color || '',
-				Size: ColorSize.Data[SKU] && ColorSize.Data[SKU].size || ''
-			};
-
-			/* Categories */
-
-			ProductRow.Categories = Categories.FamilyCategories[ProductRow.Familia] || [];
-
-			/* Images */					
-		
-			var ImageId;
-			var GalleryImageIds;
-			var VariationGalleryImages;
-			var ProductImages = Images.Group[SKU] && 
-				Images.Group[SKU].items &&
-				Images.Group[SKU].items.map(function(Image) {
-
-				return Image.attid;
-			});
-
-			switch(ProductRow.Type) {
-
-				case 'simple':
-				case 'variable':
-
-					ProductRow.ImageId = ProductImages && 
-															(ProductImages.length > 0 ) && 
-															ProductImages.shift();
-
-					ProductRow.GalleryImageIds = ProductImages && 
-																			(ProductImages.length > 0 ) &&
-																			 ProductImages;
-					break;
-
-				case 'variation':
-
-					ProductRow.VariationGalleryImages = ProductImages && 
-																						 (ProductImages.length > 0 ) &&
-																							ProductImages;
-					break;
-			}
+			var Group = ProductParentGroups[ParentSKU];
+			var ProductCount = Group.length;
+			
+			(ProductCount == 1) && addSimpleProduct(Group);
+			(ProductCount != 1) && addVariableProduct(Group, ParentSKU);
 		});
-
-		return ProductRows;
-	}
-
-	/* Excel data -------------------------------
-	% Impuesto: "Sí"
-	% Impuesto compra: "No"
-	Attributes: {Color: "GRIS OSCURO", Size: "160x250"}
-	Categories: (4) [34, 48, 35, 23]
-	Color: 190
-	Control Stock: "#BACDE2"
-	Código Barras: "01.BLAN.BAKU.CHAR.250"
-	Familia: "BLANKET"
-	Name: "Blanket Bakuga"
-	PLU: 21
-	Parent: "01.BLAN.BAKU.CHAR.250"
-	Precio Coste: 21
-	Precio General: "160x250"
-	Producto: "BLANKET BAKUGA CHARCOAL 250CM"
-	SKUParent: "01.BLAN.BAKU"
-	Size: 73
-	Type: "variable"
-	VariationGalleryImages: ["49959"]
-	Variations: {Color: Array(4), Size: Array(2)}
-	Venta Peso: "BLANKET BAKUGA CHARCOAL 250CM"
-	texto Boton: "GRIS OSCURO"
-	*/
-
-	function formatProduct(Product) {
-
-		var SKU = Product['Código Barras'];
-
-		return {
-			/* Calculated from Excel */
-			sku: SKU,
-			parent_code: Product.SKUParent,
-			parent_sku: Product.Parent == SKU ? null : Product.Parent,
-			type: Product.Type,
-			name: Product.Producto,
-			category_ids: Product.Categories,
-			sale_price: Product['Precio General'],
-			/* Calculated from ColorSize */
-			attributes: {
-				attribute_color: Product.Attributes.Color,
-				attribute_size: Product.Attributes.Size
-			},	
-			variations: Product.Variations,
-			/* Calculated from Images */
-			image_id: Product.ImageId,
-			gallery_image_ids: Product.GalleryImageIds,
-			variation_gallery_images: Product.VariationGalleryImages,				
-			/* Calculated from Stock */
-			stock_quantity: 1
-		};
-	}
+	}	
 
 	/* Processs on user interaction */
 
 	Self.processExcelData = function(RowsRange) {
 
 		var $Q = $q.defer();
-
-		Products.NewData = {}; 
 		
 		$rootScope.$broadcast('opendialog', {
 			Title: 'Excel to Web Products',
@@ -243,15 +222,7 @@ function (
 
 		$timeout(function() {
 
-			// Sort, Calculate Parent, Categories, Color, Size, Type, Variations ...
-			digestRange(RowsRange)
-			// Translate to WooCommerce struct
-			.map(formatProduct)
-			// Save list in service
-			.forEach(function(Product) {
-
-				Products.NewData[Product.sku] = Product;
-			});
+			digestRange(RowsRange);
 		
 			$rootScope.$emit('notifydialog', { text: 'Calculating differences with web status' });
 

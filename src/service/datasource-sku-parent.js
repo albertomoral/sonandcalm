@@ -1,17 +1,16 @@
-/* datasource-color-size.js */
+/* datasource-sku-parent.js */
 
 APP.factory(
-	'ColorSize', 
+	'ParentSku', 
 function (
-	$http,
-	Products
+	$http
 ) {
 
 	var Self = {};
 
 	Self.Data = {};	
 
-	$http.get('/wp-json/poeticsoft/woo-products-sku-parent-read')
+	$http.get('/wp-json/poeticsoft/woo-products-parent-sku-read')
 	.then(function(Response) {
 
 		var Code = Response.data.Status.Code;

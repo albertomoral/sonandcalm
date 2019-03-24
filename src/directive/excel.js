@@ -12,7 +12,8 @@ APP.directive(
 			Notifications,
 			ExcelToWeb,
 			Products,
-			ColorSize
+			ColorSize,
+			ParentSku
 		) {
 			
 			$scope.allowProcessing = false;
@@ -81,7 +82,7 @@ APP.directive(
 				if(FieldsFootPrint == Products.FootPrint.FieldHash) {
 
 					$rootScope.$emit('notifydialog', { text: 'Sheet valid, processsing...' });
-					$timeout(processSheet, 200);
+					$timeout(updateSheet, 200);
 
 				} else {
 			
@@ -96,18 +97,14 @@ APP.directive(
 				}
 			}
 
-			function processSheet() {
+			//  Create parent, color, and size columns and update data from last saved
 
-				$rootScope.$emit('notifydialog', { text: 'Creating variations, color and sizes...' });
+			function updateSheet() {
 
-				ProductsSheet.range(
-					'A2:' + 
-					Products.FootPrint.ForTree.MaxCellIndex + 
-					RowCount
-				).sort(Products.FootPrint.ForTree.InsertParentIndex);
+				$rootScope.$emit('notifydialog', { text: 'Creating parent color and size columns...' });
 
 				ProductsSheet.insertColumn(Products.FootPrint.ForTree.InsertParentIndex);
-				ProductsSheet.columnWidth(Products.FootPrint.ForTree.InsertParentIndex, 170);
+				ProductsSheet.columnWidth(Products.FootPrint.ForTree.InsertParentIndex, 100);
 				ProductsSheet.insertColumn(Products.FootPrint.ForTree.InsertColorSizeIndex);
 				ProductsSheet.columnWidth(Products.FootPrint.ForTree.InsertColorSizeIndex, 170);
 				ProductsSheet.insertColumn(Products.FootPrint.ForTree.InsertColorSizeIndex);
@@ -124,49 +121,115 @@ APP.directive(
 					ProductsSheet.range(Range).enable(false)
 				});
 
-				var SKUParentCode = '';
-				var SKUParent = '';
-				var I = 1;
-				var AlternateProduct = true;
+				$rootScope.$emit('notifydialog', { text: 'Updating last saved parent, color & size data...' });
+				
+				var I = 1; // ROW Index
 
-				function parseRow() {
+				function updateParentColorSizeRow() {
 
-					var ParentCell = ProductsSheet.range(Products.FootPrint.ForTree.ParentCellIndex + (I+1));
-					var SKUCell = ProductsSheet.range(Products.FootPrint.ForTree.SKUCellAfterInsertIndex + (I+1));
-					var SKU = SKUCell.value();
+					var RowIndex = I+1;
+					var SKUCell = 		ProductsSheet.range(Products.FootPrint.ForTree.SKUCellAfterInsertIndex + RowIndex);
+					var SKU = SKUCell.value();					
+					var ParentCell = 	ProductsSheet.range(Products.FootPrint.ForTree.ParentCellIndex + RowIndex);
+					var ColorCell = 	ProductsSheet.range(Products.FootPrint.ForTree.ColorCellIndex + RowIndex);
+					var SizeCell = 		ProductsSheet.range(Products.FootPrint.ForTree.SizeCellIndex + RowIndex);
+
+					$rootScope.$emit('notifydialog', { text: 'Updating ' + I + ' - ' + SKU  });
 
 					if($.trim(SKU) != '') {
-
-						SKU = $.trim(SKU).split(',').join('.');
+						
+						SKU = $.trim(SKU).split(',').join('.'); // Correct sku
 						SKUCell.value(SKU);
 
-						var Code = SKU.split('.');
-						var ParentCode = Code[0] + '.' + Code[1] + '.' + Code[2];
+						var SKUCode = SKU.split('.');
+						var ParentSKUCode = SKUCode[0] + '.' + SKUCode[1] + '.' + SKUCode[2];
+						ParentCell.value(ParentSku.Data[SKU] || ParentSKUCode); // Pude ser nuevo
+						ColorCell.value(ColorSize.Data[SKU] && ColorSize.Data[SKU].color || '');
+						SizeCell.value(ColorSize.Data[SKU] && ColorSize.Data[SKU].size || '');
+					}
 
-						if(ParentCode != SKUParentCode) { 
+					I++;
 
-							SKUParent = SKU;
-							SKUParentCode = ParentCode;
-							AlternateProduct = !AlternateProduct;
+					if(I<RowCount + 1) {
+
+						if(CanProcess) {
+
+							return $timeout(updateParentColorSizeRow, 0);
+
+						} else {
+		
+							$rootScope.$emit(
+								'notifydialog', 
+								{ 
+									text: 'Process cancelled. Please load file again',
+									close: function() {
+
+										ProductsSheet.range(
+											'A1:' + Products.FootPrint.ForTree.SizeCellIndex + RowCount
+										).clear();
+										$rootScope.$emit('closedialog');
+									}
+								}
+							);
+
+							$timeout(function() {		
+
+								ProductsSheet.range(
+									'A1:' + Products.FootPrint.ForTree.SizeCellIndex + RowCount
+								).clear();
+								$rootScope.$emit('closedialog');
+
+							}, 5000);
 						}
 
-						ParentCell.value(SKUParent);
+					} else {
+					
+						$rootScope.$emit('notifydialog', { text: 'Data updated, creating variations...' });
+
+						ProductsSheet.range(
+							'A2:' + 
+							Products.FootPrint.ForTree.SizeCellIndex + 
+							RowCount
+						).sort(Products.FootPrint.ForTree.InsertParentIndex);
+
+						$timeout(function() {
+
+							I = 1; // Reset ROW Index
+
+							processVariationsRow();
+						}, 200);
+					}
+				}
+
+				updateParentColorSizeRow();
+
+				// Sort and colorize variations
+
+				var SKUParent = '';
+				var AlternateProduct = true;
+
+				function processVariationsRow() {
+
+					var RowIndex = I+1;
+					var SKUCell = ProductsSheet.range(Products.FootPrint.ForTree.SKUCellAfterInsertIndex + RowIndex);
+					var ParentCell = ProductsSheet.range(Products.FootPrint.ForTree.ParentCellIndex + RowIndex);
+					var SKU = SKUCell.value();
+					var Parent = ParentCell.value();
+
+					if($.trim(SKU) != '') {						
+
+						if(Parent != SKUParent) { 
+
+							SKUParent = Parent;
+							AlternateProduct = !AlternateProduct;
+						}
+						
 						var ProductColor = AlternateProduct ? '#efefef' : '#ffffff';
 						ProductsSheet.range(
 							'A' + (I+1) + ':' + Products.FootPrint.ForTree.SizeCellIndex + (I+1)
 						).background(ProductColor);
-
-						if(ColorSize.Data[SKU]) {
-							
-							ProductsSheet.range(
-								Products.FootPrint.ForTree.ColorCellIndex + (I+1)
-							).value(ColorSize.Data[SKU].color);
-							ProductsSheet.range(
-								Products.FootPrint.ForTree.SizeCellIndex + (I+1)
-							).value(ColorSize.Data[SKU].size);
-						}
 						
-						$rootScope.$emit('notifydialog', { text: I + ' - ' + SKU + ' > ' + SKUParent });
+						$rootScope.$emit('notifydialog', { text: 'Grouping ' + I + ' - ' + SKU + ' > ' + SKUParent });
 
 					} else {
 						
@@ -176,6 +239,7 @@ APP.directive(
 						ProductsSheet.range(
 							'A' + (I+1) + ':' + Products.FootPrint.ForTree.SizeCellIndex + (I+1)
 						).color('#ffffff');
+
 						$rootScope.$emit('notifydialog', { text: 'Product without SKU' });
 					}
 
@@ -185,7 +249,7 @@ APP.directive(
 
 						if(CanProcess) {
 
-							return $timeout(parseRow, 0);
+							return $timeout(processVariationsRow, 0);
 
 						} else {
 		
@@ -224,8 +288,6 @@ APP.directive(
 						}, 200);
 					}
 				}
-				
-				parseRow();
 			}
 
 			/* Load last excel saved */
@@ -274,8 +336,8 @@ APP.directive(
 
 							$rootScope.$emit('closedialog');
 
-							/* DEBUG
-							$scope.generateWebProducts(); */
+							/* DEBUG */
+							$scope.generateWebProducts();
 							
 						}, 200);
 
@@ -303,8 +365,6 @@ APP.directive(
 				$rootScope.$emit('notifydialog', { text: 'Extracting parent, color and size...' });
 
 				Data.ProductsSheetData.rows.forEach(function(Row) {
-
-					comnsole.log();
 
 					var Parent = Row.cells[Products.FootPrint.ForData.ParentIndex].value;
 					var SKU = Row.cells[Products.FootPrint.ForData.SKUIndex].value;

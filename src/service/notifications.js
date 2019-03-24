@@ -3,7 +3,6 @@
 APP.factory(
    'Notifications',
 function (
-  $q, 
   $timeout
 ) {
 

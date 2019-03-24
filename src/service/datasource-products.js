@@ -119,6 +119,13 @@ function (
 		.forEach(function(SKU) {
 
 			TempData.push(Self.TempData[SKU]);
+		});		
+
+		TempData.sort(function(a, b) {
+
+			if (a.sku < b.sku) { return -1; }
+			if (a.sku > b.sku) { return 1; };
+			return 0;
 		});
 
 		Self.DS.read({ data: TempData });
@@ -144,7 +151,7 @@ function (
 					'sku': { type: 'string', editable: false },
 					'parent_sku': { type: 'string', editable: false, nullable: true },
 					'type': { type: 'string', editable: false },
-					'name': { type: 'string', editable: false, expanded: false },
+					'name': { type: 'string', editable: false },
 					'category_ids': [],	
 					'sale_price': { type: 'number', editable: false },
 					/* Calculated from ColorSize */

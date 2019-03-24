@@ -3,8 +3,7 @@
 APP.factory(
 	'ColorSize', 
 function (
-	$http,
-	Products
+	$http
 ) {
 
 	var Self = {};

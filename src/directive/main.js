@@ -5,6 +5,8 @@ APP.directive(
 function() {
 
 	function controller(
+		$rootScope,
+		$timeout,
 		$window
 	) {
 
@@ -12,14 +14,21 @@ function() {
 
 		function resize() {
 
-			jQuery('.poeticsoft-main')
+			jQuery('.poeticsoft-woo-agora')
 			.css({
 				height: $$Window.height() - 32
 			}); 
 		}
 
 		angular.element($window).on('resize', resize);
-		resize();
+		resize();		
+
+		$timeout(function() {
+						
+			$rootScope.$broadcast('opendialog', {
+				Title: 'Loading data...'
+			});
+		});
 	}
 
 	return {
@@ -30,11 +39,11 @@ function() {
 		template: `<div class="poeticsoft-woo-agora">
 			<div kendo-tab-strip>
 				<ul>
-					<li>Color Size</li>
-					<li class="k-state-active">Agora</li>
-					<li>Web</li>
+					<!-- li>Color Size</li -->
+					<li>Agora</li>
+					<li class="k-state-active">Web</li>
 				</ul>                      
-				<poeticsoft-woo-agora-color-size></poeticsoft-woo-agora-color-size>                 
+				<!-- poeticsoft-woo-agora-color-size></poeticsoft-woo-agora-color-size -->                 
 				<poeticsoft-woo-agora-excel></poeticsoft-woo-agora-excel> 
 				<div class="Web">
 					<div kendo-tab-strip>
