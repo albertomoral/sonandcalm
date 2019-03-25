@@ -31,13 +31,15 @@ function() {
     var Columns = [
       {
         field: 'name',
-        expandable: true,
-        title: 'Name'
+        title: 'Name',
+        expandable: true
       },
       {
         field: 'type',
         title: 'Type',
-        width: 100
+        width: 100,
+        template: '<div class="#= type #">#= type #</div>',
+        attributes: { class: 'Type' }
       },
       {
         field: 'sku',

@@ -214,8 +214,7 @@ function (
 
 	/* Save conversion to web and update woo products */
 
-	var ProcessFragments;	
-	var ProcessFragmentsOrdered = [
+	var ProcessFragments = [
 		'deleted_variation',	
 		'deleted_variable',
 		'deleted_simple',
@@ -236,8 +235,10 @@ function (
 
 		var Chain = $q.when();
 		var Count = 0;
+		var Total = 0;
+		var Errors = ['TEST'];
 		
-		ProcessFragmentsOrdered 
+		ProcessFragments 
 		.forEach(function(Key) {
 
 			var Code = Key.split('_');
@@ -248,32 +249,59 @@ function (
 				return Product.status == Status &&
 							 Product.type == Type;
 			});
-			
-			Chain.then(function(Response) {
+			var ProductsListChunks = _.chunk(ProductList, 20);
 
-        return $http.post(
-					'/wp-json/poeticsoft/woo-products-process',
-					{ 
-						mode: Key,
-						products: ProductList
-					}
-				)
-				.then(function(Response) {
-					
-					Count++;
-					if(Count == ProcessFragmentsOrdered.length) {										
+			ProductsListChunks
+			.forEach(function(Chunk, Index) {
 
-						$Q.resolve();
-					}
+				Total ++;
 				
-					if(Response.data.Status.Code == 'KO') {	
+				Chain.then(function(Response) {
 
-						return Notifications.show({ errors: Response.data.Status.Reason });						
-					}
+					return $http.post(
+						'/wp-json/poeticsoft/woo-products-process',
+						{ 
+							mode: Key,
+							products: Chunk,
+							chunk: Index
+						}
+					)
+					.then(function(Response) {
 					
-					$rootScope.$emit('notifydialog', { text: Response.data.Status.Message }); 
+						if(Response.data.Status.Code == 'KO') {	
+
+							Errors.push(Response.data.Status.Reason);						
+						}
+						
+						Count++;
+						if(Count == Total) {	
+
+							if(Errors.length > 0) {
+
+								Notifications.show({ errors: Errors.join(' - ') });	
+							}							
+
+							$Q.resolve();
+						}
+
+						$rootScope.$emit(
+							'notifydialog', 
+							{ 
+								text: Response.data.Status.Message +
+										  ' saved block ' + 
+											Index +
+											' of ' +
+											Chunk.length + 
+											' ' + 
+											Status + 
+											' ' + 
+											Type + 
+											' products...'
+							}
+						); 
+					});
 				});
-      });
+			});	
 		});
 
 		return $Q.promise;
