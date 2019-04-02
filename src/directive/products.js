@@ -14,7 +14,8 @@ function() {
     ExcelToWeb,
     Products, 
     Categories,
-    Images
+    Images,
+    Stock
   ) {
 
     /* ----------------------------------------------------
@@ -24,6 +25,29 @@ function() {
     $scope.haveImages = function(SKU) {
 
       return Images.Group[SKU] && Images.Group[SKU].count || 0;
+    }
+
+    function checkValue(Var) {
+
+      if(typeof Var == 'undefined') {
+
+        return '-';
+      } 
+      return Var;
+    }
+
+    $scope.getStock = function(Item) {
+
+      if(Item.type == 'variable') { 
+
+        return '';
+      }
+
+      var SavedStockValue = Stock.Data[Item.sku] ? checkValue(Stock.Data[Item.sku].Value) : '-';
+
+      return Item.stock_quantity + ' | ' +
+             SavedStockValue + ' | ' + 
+             checkValue(Item.new_stock);
     }
 
     /* Columns config */
@@ -42,15 +66,11 @@ function() {
         attributes: { class: 'Type' }
       },
       {
-        field: 'sku',
-        title: 'SKU',
-        width: 200
-      },
-      {
-        title: 'Data',
-        width: 45,
-        template: '<i class="k-icon k-i-question"></i>',
-        attributes: { class: 'Data' }
+        field: 'stock_quantity',
+        title: 'Stock',
+        template: '<div title="Web | Last saved export | Last apply">{{ getStock(dataItem) }}</div>',
+        width: 100,
+        attributes: { class: 'Stock' }
       },
       {
         title: 'Image/s',
@@ -63,9 +83,7 @@ function() {
         title: 'Status',
         width: 60,
         template: '<div class="k-icon #= status #" title="#= status #"></div>',
-        attributes: {
-          class: 'Status'
-        }
+        attributes: { class: 'Status' }
       }
     ];
 
@@ -106,7 +124,6 @@ function() {
       Products.loadFromWeb()
       .then(function() {
 
-        $RevertButton.prop('disabled', true);
         $SaveButton.prop('disabled', true);
         $rootScope.$emit('closedialog');
       });
@@ -122,15 +139,13 @@ function() {
       Products.saveToWeb()
       .then(function() {
 
-        $RevertButton.prop('disabled', true);
-        $SaveButton.prop('disabled', true);
+        // $SaveButton.prop('disabled', true);
         $rootScope.$emit('closedialog');
       });
     }    
 
 		$scope.$on('productschanged', function() {        
 
-      $RevertButton.prop('disabled', false);
       $SaveButton.prop('disabled', false);
     });
 
@@ -144,7 +159,7 @@ function() {
 
     function dataContent(E) {
 
-      var Row = $(E.target).parents('tr');
+      var Row = jQuery(E.target).parents('tr');
 
       if(Row.length == 0) {
 
@@ -194,12 +209,11 @@ function() {
       
       if (widget === $scope.ProductKendoTreeList) {
 
-        var $GridElement = $($scope.ProductKendoTreeList.element);
+        var $GridElement = jQuery($scope.ProductKendoTreeList.element);
 
         $RevertButton = $GridElement.find('.k-grid-toolbar button[data-command="reload"]');
         $SaveButton = $GridElement.find('.k-grid-toolbar button[data-command="savetoweb"]');
 
-        $RevertButton.prop('disabled', true);
         $SaveButton.prop('disabled', true);
 
         var DataTooltip = $GridElement
@@ -221,15 +235,15 @@ function() {
         $GridElement
         .on(
           'mouseenter',
-          '.Data',
+          '.Status',
           function() {
 
-            DataTooltip.show($(this));
+            DataTooltip.show(jQuery(this));
           }
         )
         .on(
           'mouseleave',
-          '.Data',
+          '.Status',
           function() {
 
             // DataTooltip.hide();

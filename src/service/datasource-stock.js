@@ -1,7 +1,7 @@
-/* datasource-color-size.js */
+/* datasource-sku-parent.js */
 
 APP.factory(
-	'ColorSize', 
+	'Stock', 
 function (
 	$http
 ) {
@@ -10,13 +10,13 @@ function (
 
 	Self.Data = {};	
 
-	$http.get('/wp-json/poeticsoft/woo-products-color-size-read')
+	$http.get('/wp-json/poeticsoft/woo-products-stock-read')
 	.then(function(Response) {
 
 		var Code = Response.data.Status.Code;
 		if(Code == 'OK'){ 
 
-			Self.Data = Response.data.Data; 
+			Self.Data = Response.data.Data;
 
 		} else {
 

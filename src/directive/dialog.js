@@ -45,7 +45,7 @@ APP.directive(
 			
 			$rootScope.$on('opendialog', function($event, Data) {
 
-				var $ButtonGroup = $($document).find('.k-window.k-dialog .k-dialog-buttongroup');
+				var $ButtonGroup = jQuery($document).find('.k-window.k-dialog .k-dialog-buttongroup');
 
 				if(Data.cancel) {
 
@@ -67,7 +67,7 @@ APP.directive(
 
 				if(Data.close) {
 					
-					var $ButtonGroup = $($document).find('.k-window.k-dialog .k-dialog-buttongroup');
+					var $ButtonGroup = jQuery($document).find('.k-window.k-dialog .k-dialog-buttongroup');
 
 					$ButtonGroup.addClass('CanCancel');
 					cancelAction = Data.close;

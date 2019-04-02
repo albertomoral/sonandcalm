@@ -39,7 +39,8 @@ gulp.task('compile_sonandcalm', ['compile_scss'], function() {
 	.pipe(gulp.dest('./dist/'));		
 
 	gulp.src([
-		'../bower_components/kendo-ui/js/jquery.min.js'
+		'../bower_components/kendo-ui/js/jquery.min.js',			
+		'../bower_components/underscore/underscore-min.js',
 	])
 	.pipe(gulp.dest('./dist/'));
 
@@ -47,8 +48,8 @@ gulp.task('compile_sonandcalm', ['compile_scss'], function() {
 		'../bower_components/kendo-ui/js/angular.min.js',
 		'../bower_components/kendo-ui/js/kendo.all.min.js',
 		'../bower_components/jszip/dist/jszip.min.js',
-		
-		'../bower_components/lodash/dist/lodash.min.js',
+
+		'../bower_components/underscore.string/dist/underscore.string.min.js',
 
 		'./src/module.js',
 
@@ -56,14 +57,17 @@ gulp.task('compile_sonandcalm', ['compile_scss'], function() {
 		'./src/service/datasource-products.js',
 		'./src/service/datasource-images.js',			
 		'./src/service/datasource-color-size.js',				
-		'./src/service/datasource-sku-parent.js',	
+		'./src/service/datasource-sku-parent.js',					
+		'./src/service/datasource-stock.js',	
 		'./src/service/excel-to-web.js',
 		'./src/service/notifications.js',
+		'./src/service/loader.js',
 		'./src/service/utils.js',
 
 		'./src/directive/main.js',
 		'./src/directive/dialog.js',
-		'./src/directive/excel.js',
+		'./src/directive/agora-data.js',
+		'./src/directive/agora-stock.js',
 		'./src/directive/color-size.js',
 		'./src/directive/products.js',
 		'./src/directive/categories.js',
@@ -95,34 +99,28 @@ gulp.task('compile_sonandcalm', ['compile_scss'], function() {
 	return setTimeout(livereload.reload, 800);
 });	
 
-gulp.task('update_sonandcalm', ['compile_sonandcalm'], function() {	
+gulp.task('update_sonandcalm', function() {	
 
 	gulp.src('../bower_components/kendo-ui/styles/images/kendoui.woff')
-	.pipe(gulp.dest('P:/sonandcalm/www.sonandcalm.com/wp-content/plugins/poeticsoft-utils/images/'));
+	.pipe(gulp.dest('P:/sonandcalm/www.sonandcalm.com/wp-content/plugins/poeticsoft-woo-agora/images/'));
 
 	gulp.src([
 		'../bower_components/kendo-ui/styles/Metro/loading-image.gif',
 		'../bower_components/kendo-ui/styles/Metro/loading.gif'
 	])
-	.pipe(gulp.dest('P:/sonandcalm/www.sonandcalm.com/wp-content/plugins/poeticsoft-utils/Metro/'));
+	.pipe(gulp.dest('P:/sonandcalm/www.sonandcalm.com/wp-content/plugins/poeticsoft-woo-agora/Metro/'));
 
 	gulp.src([
 		'../bower_components/kendo-ui/styles/fonts/glyphs/WebComponentsIcons.ttf',
 		'../bower_components/kendo-ui/styles/fonts/glyphs/WebComponentsIcons.woff'
 	])
-	.pipe(gulp.dest('P:/sonandcalm/www.sonandcalm.com/wp-content/plugins/poeticsoft-utils/fonts/glyphs/'));
+	.pipe(gulp.dest('P:/sonandcalm/www.sonandcalm.com/wp-content/plugins/poeticsoft-woo-agora/fonts/glyphs/'));
 
 	gulp.src('./dist/main.css')
-	.pipe(gulp.dest('P:/sonandcalm/www.sonandcalm.com/wp-content/plugins/poeticsoft-utils/'));
-
-	gulp.src('./dist/jquery.min.js')
-	.pipe(gulp.dest('P:/sonandcalm/www.sonandcalm.com/wp-content/plugins/poeticsoft-utils/'));
+	.pipe(gulp.dest('P:/sonandcalm/www.sonandcalm.com/wp-content/plugins/poeticsoft-woo-agora/'));
 
 	gulp.src('./dist/main.js')
-	.pipe(gulp.dest('P:/sonandcalm/www.sonandcalm.com/wp-content/plugins/poeticsoft-utils/'));
-
-	gulp.src('./dist/index.html')
-	.pipe(gulp.dest('P:/sonandcalm/www.sonandcalm.com/wp-content/plugins/poeticsoft-utils/'));
+	.pipe(gulp.dest('P:/sonandcalm/www.sonandcalm.com/wp-content/plugins/poeticsoft-woo-agora/'));
 
 	return setTimeout(livereload.reload, 1500);
 });

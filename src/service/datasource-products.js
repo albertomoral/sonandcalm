@@ -5,7 +5,9 @@ APP.factory(
 function (
 	$http,
 	$q, 
+	$timeout,
 	$rootScope,
+	Stock,
 	Notifications
 ) {
 
@@ -13,9 +15,9 @@ function (
 
 	/* Local data for process */
 
-	Self.WebData = {};
-	Self.NewData = {};
-	Self.TempData = {};	
+	Self.WebData = {}; 		// Products loaded from web
+	Self.AgoraData = {}; 	// Products from agora export 
+	Self.TempData = {};		// Process buffer
 
 	var PlainCompares = [
 		'parent_sku',
@@ -34,17 +36,22 @@ function (
 
 	function updateData(SKU) {
 
+		/* Changes array */
+
+		Self.TempData[SKU].changes = [];
+
 		/* Plain */
 
 		PlainCompares.forEach(function(Field) {
 
 			if(
 				Self.WebData[SKU][Field] != 
-				Self.NewData[SKU][Field]
+				Self.AgoraData[SKU][Field]
 			) {
 
-				Self.TempData[SKU][Field] = Self.NewData[SKU][Field];
+				Self.TempData[SKU][Field] = Self.AgoraData[SKU][Field];
 				Self.TempData[SKU].status = 'changed';
+				Self.TempData[SKU].changes.push(Field);
 			}
 		});
 
@@ -54,36 +61,39 @@ function (
 
 			if(
 				[].concat(Self.WebData[SKU][Field]).sort().join() != 
-				[].concat(Self.NewData[SKU][Field]).sort().join()
+				[].concat(Self.AgoraData[SKU][Field]).sort().join()
 			) {
 
-				Self.TempData[SKU][Field] = Self.NewData[SKU][Field];
+				Self.TempData[SKU][Field] = Self.AgoraData[SKU][Field];
 				Self.TempData[SKU].status = 'changed';
+				Self.TempData[SKU].changes.push(Field);
 			}
 		});
 
 		/* Attributes */
 
 		if(
-			Self.WebData[SKU].attributes.attribute_color != 
-			Self.NewData[SKU].attributes.attribute_color
+			Self.WebData[SKU].attributes.color != 
+			Self.AgoraData[SKU].attributes.color
 		) {
 
-			Self.TempData[SKU].attributes.attribute_color = Self.NewData[SKU].attributes.attribute_color;
+			Self.TempData[SKU].attributes.color = Self.AgoraData[SKU].attributes.color;
 			Self.TempData[SKU].status = 'changed';
+			Self.TempData[SKU].changes.push('color');
 		}		
 
 		if(
-			Self.WebData[SKU].attributes.attribute_size != 
-			Self.NewData[SKU].attributes.attribute_size
+			Self.WebData[SKU].attributes.size != 
+			Self.AgoraData[SKU].attributes.size
 		) {
 
-			Self.TempData[SKU].attributes.attribute_size = Self.NewData[SKU].attributes.attribute_size;
+			Self.TempData[SKU].attributes.size = Self.AgoraData[SKU].attributes.size;
 			Self.TempData[SKU].status = 'changed';
+			Self.TempData[SKU].changes.push('size');
 		}
 	}
 
-	Self.processDifferences = function() {
+	Self.updateFromAgora = function() {
 
 		Self.TempData = {};
 
@@ -93,13 +103,13 @@ function (
 		.forEach(function(SKU) {
 
 			Self.TempData[SKU] = Self.WebData[SKU];
-			if(!Self.NewData[SKU]) { Self.TempData[SKU].status = 'deleted';  }
+			if(!Self.AgoraData[SKU]) { Self.TempData[SKU].status = 'deleted';  }
 		});
 
-		Object.keys(Self.NewData)
+		Object.keys(Self.AgoraData)
 		.forEach(function(SKU) {
 
-			Self.TempData[SKU] = Self.NewData[SKU];
+			Self.TempData[SKU] = Self.AgoraData[SKU];
 			Self.TempData[SKU].status = 'updated';			
 
 			/* Mark as new if not in web */
@@ -114,21 +124,27 @@ function (
 
 		/* visualize result */
 
-		var TempData = [];
+		visualize();
+	}
+
+	function visualize() {
+
+		var VisualizeData = [];
+
 		Object.keys(Self.TempData)
 		.forEach(function(SKU) {
 
-			TempData.push(Self.TempData[SKU]);
+			VisualizeData.push(Self.TempData[SKU]);
 		});		
 
-		TempData.sort(function(a, b) {
+		VisualizeData.sort(function(a, b) {
 
 			if (a.sku < b.sku) { return -1; }
 			if (a.sku > b.sku) { return 1; };
 			return 0;
 		});
 
-		Self.DS.read({ data: TempData });
+		Self.DS.read({ data: VisualizeData });
 
 		$rootScope.$broadcast('productschanged');
 	}
@@ -156,8 +172,8 @@ function (
 					'sale_price': { type: 'number', editable: false },
 					/* Calculated from ColorSize */
 					'attributes': {
-						'attribute_color': '',
-						'attribute_size': ''
+						'color': '',
+						'size': ''
 					},
 					/* Calculated from Images */
 					'image_id': { type: 'number', editable: false },
@@ -197,15 +213,21 @@ function (
 				}			
 
 				Self.WebData = {};
+				Self.AgoraData = {};
+				Self.TempData = {};
+
 				Response.data.Data.forEach(function(Product) {
 
 					Product.status = 'updated';
-					Self.WebData[Product.sku] = Product;				
+					Product.parent_sku = Product.parent_sku || null; // Tree View
+					Self.WebData[Product.sku] = Product;						
+					Self.AgoraData[Product.sku] = Product;							
+					Self.TempData[Product.sku] = Product;		
 				});
 
 				/* Visualize */
 
-				Self.DS.read({ data: Response.data.Data });
+				visualize();
 			}
 		);
 
@@ -230,14 +252,14 @@ function (
 
 		var $Q = $q.defer();
 
-		/* same as Self.TempData because may be in a future grid will be editable */
-		var ProductsData = Self.DS.data().toJSON();
+		/* same as Self.TempData but may be in a future grid will be editable */
 
-		var Chain = $q.when();
-		var Count = 0;
-		var Total = 0;
-		var Errors = ['TEST'];
+		var ProductsData = Self.DS.data().toJSON();
 		
+		/* Generate queue */
+
+		var Queue = [];
+
 		ProcessFragments 
 		.forEach(function(Key) {
 
@@ -248,61 +270,73 @@ function (
 
 				return Product.status == Status &&
 							 Product.type == Type;
-			});
+			});			
 			var ProductsListChunks = _.chunk(ProductList, 20);
+			var ChunkCount = ProductsListChunks.length;
 
 			ProductsListChunks
 			.forEach(function(Chunk, Index) {
 
-				Total ++;
-				
-				Chain.then(function(Response) {
-
-					return $http.post(
-						'/wp-json/poeticsoft/woo-products-process',
-						{ 
-							mode: Key,
-							products: Chunk,
-							chunk: Index
-						}
-					)
-					.then(function(Response) {
-					
-						if(Response.data.Status.Code == 'KO') {	
-
-							Errors.push(Response.data.Status.Reason);						
-						}
-						
-						Count++;
-						if(Count == Total) {	
-
-							if(Errors.length > 0) {
-
-								Notifications.show({ errors: Errors.join(' - ') });	
-							}							
-
-							$Q.resolve();
-						}
-
-						$rootScope.$emit(
-							'notifydialog', 
-							{ 
-								text: Response.data.Status.Message +
-										  ' saved block ' + 
-											Index +
-											' of ' +
-											Chunk.length + 
-											' ' + 
-											Status + 
-											' ' + 
-											Type + 
-											' products...'
-							}
-						); 
-					});
+				Queue.push({
+					mode: Key,
+					products: Chunk,
+					chunk: Index + 1,
+					count: ChunkCount
 				});
-			});	
+			});
 		});
+
+		function processQueue() {
+
+			if(Queue.length == 0) {
+
+				return $Q.resolve();
+			}
+
+			var Chunk = Queue.shift();
+
+			$http.post(
+				'/wp-json/poeticsoft/woo-products-process',
+				Chunk
+			)
+			.then(function(Response) {
+			
+				if(Response.data.Status.Code == 'KO') {						
+
+					$Q.resolve();				
+
+					return Notifications.show({ errors: Response.data.Status.Reason });	
+				}
+				
+				$rootScope.$emit('notifydialog', { text: Response.data.Status.Message }); 
+
+				$timeout(processQueue, 10);
+			});
+		}
+
+		processQueue();		
+
+		return $Q.promise;
+	}
+
+	/* Update stock in actual products */
+
+	Self.updateStock = function() {
+
+		var $Q = $q.defer();
+				
+		Object.keys(Self.TempData)
+		.forEach(function(Key) {
+
+			if(Stock.Data[Key]) {				
+
+				Self.TempData[Key].new_stock = Stock.Data[Key].Value;
+			}
+		})
+
+		visualize();
+
+		$Q.resolve();
 
 		return $Q.promise;
 	}

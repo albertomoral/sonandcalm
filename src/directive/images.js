@@ -70,8 +70,11 @@ APP.directive(
           { 
             field: 'image', 
             title: '&nbsp;',
-            template: '<img src="/wp-content/uploads/product-images/#: thumb  #?#= Math.round(Math.random() * 1000) #" ' +
-                           'style="display: block; width:100%;"/>',           
+            template: '<a href="/wp-content/uploads/product-images/#: view  #?#= Math.round(Math.random() * 1000) #" ' +
+                          'target="_new">' + 
+                          '<img src="/wp-content/uploads/product-images/#: thumb  #?#= Math.round(Math.random() * 1000) #" ' +
+                               'style="display: block; width:100%;"/>' +
+                      '</a>',           
             width: '100px',          
             attributes: {
               style: 'padding: 0; border-width: 1px 0 0 0;'
@@ -111,7 +114,7 @@ APP.directive(
 
           var grid = this;
 
-          $(".k-grouping-row")
+          jQuery(".k-grouping-row")
           .each(function (e) {
               grid.collapseGroup(this);
           });
@@ -173,9 +176,9 @@ APP.directive(
             }
           });
 
-          $($element)
+          jQuery($element)
           .find('.k-widget.k-upload.k-header')
-          .prepend($('<span>You can drag and drop images here (jpg, gif, png)</span>'));
+          .prepend(jQuery('<span>You can drag and drop images here (jpg, gif, png)</span>'));
         }
       });
     }

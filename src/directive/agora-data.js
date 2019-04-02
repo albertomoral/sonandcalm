@@ -1,7 +1,7 @@
 /* excel.js */
 
 APP.directive(
-		'poeticsoftWooAgoraExcel', 
+		'poeticsoftWooAgoraData', 
 	function() {
 
 		function controller(
@@ -34,7 +34,7 @@ APP.directive(
         },
 				select: function(e) {
 					
-					$scope.AgoraKendoSpreadsheet
+					$scope.AgoraDataKendoSpreadsheet
 					.fromFile(e.files[0].rawFile)
 					.then(sheetLoaded);
 				}
@@ -61,7 +61,7 @@ APP.directive(
 
 				$rootScope.$emit('notifydialog', { text: 'Searching Products sheet...' });
 
-				ProductsSheet = $scope.AgoraKendoSpreadsheet.sheetByName('Productos');
+				ProductsSheet = $scope.AgoraDataKendoSpreadsheet.sheetByName('Productos');
 				if(!ProductsSheet) {
 					
 					$rootScope.$emit('closedialog');
@@ -136,9 +136,9 @@ APP.directive(
 
 					$rootScope.$emit('notifydialog', { text: 'Updating ' + I + ' - ' + SKU  });
 
-					if($.trim(SKU) != '') {
+					if(jQuery.trim(SKU) != '') {
 						
-						SKU = $.trim(SKU).split(',').join('.'); // Correct sku
+						SKU = jQuery.trim(SKU).split(',').join('.'); // Correct sku
 						SKUCell.value(SKU);
 
 						var SKUCode = SKU.split('.');
@@ -216,7 +216,7 @@ APP.directive(
 					var SKU = SKUCell.value();
 					var Parent = ParentCell.value();
 
-					if($.trim(SKU) != '') {						
+					if(jQuery.trim(SKU) != '') {						
 
 						if(Parent != SKUParent) { 
 
@@ -321,11 +321,11 @@ APP.directive(
 						delete ProductsSheetData.activeCell;
 						delete ProductsSheetData.selection;
 
-						$scope.AgoraKendoSpreadsheet.fromJSON({
+						$scope.AgoraDataKendoSpreadsheet.fromJSON({
 							sheets: [ProductsSheetData]
 						});				
 						
-						ProductsSheet = $scope.AgoraKendoSpreadsheet.activeSheet();
+						ProductsSheet = $scope.AgoraDataKendoSpreadsheet.activeSheet();
 						RowCount = ProductsSheet._rows._count;
 			
 						$scope.allowProcessing = true;
@@ -336,8 +336,8 @@ APP.directive(
 
 							$rootScope.$emit('closedialog');
 
-							/* DEBUG */
-							$scope.generateWebProducts();
+							/* DEBUG 
+							$scope.generateWebProducts();*/
 							
 						}, 200);
 
@@ -415,7 +415,7 @@ APP.directive(
 
 			/* Spreadsheet config */
 		
-			$scope.AgoraSpreadsheetConfig = {
+			$scope.AgoraDataSpreadsheetConfig = {
 				toolbar: {
 					home: false,
 					insert: false,
@@ -434,7 +434,7 @@ APP.directive(
 			
 			$scope.$on("kendoWidgetCreated", function(event, widget){
       
-        if (widget === $scope.AgoraKendoSpreadsheet) { 
+        if (widget === $scope.AgoraDataKendoSpreadsheet) { 
 					
 					$scope.loadData();
 				}
@@ -446,7 +446,7 @@ APP.directive(
 			replace: true,
 			scope: true,
 			controller: controller,
-			template: `<div class="poeticsoft-woo-agora-excel">
+			template: `<div class="poeticsoft-woo-agora-data">
 				<div class="SpreadsheetTools">
 					<input kendo-upload="AgoraKendoUpload"
 						     name="file"
@@ -457,7 +457,7 @@ APP.directive(
 						<button class="k-button"
 										ng-click="generateWebProducts()"
 										ng-disabled="!allowProcessing">
-							To web
+							Apply
 						</button>
 						<button class="k-button"
 										ng-click="loadData()"
@@ -472,8 +472,8 @@ APP.directive(
 					</div>
 				</div>
 				<div class="SpreadsheetView">
-					<div kendo-spreadsheet="AgoraKendoSpreadsheet"
-							 k-options="AgoraSpreadsheetConfig">
+					<div kendo-spreadsheet="AgoraDataKendoSpreadsheet"
+							 k-options="AgoraDataSpreadsheetConfig">
 					</div>
 				</div>
 			</div>`

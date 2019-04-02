@@ -75,7 +75,7 @@ APP.directive(
 
 						if(
 							Row.cells.length == 3 && 
-							$.trim(Row.cells[2].value) != ''
+							jQuery.trim(Row.cells[2].value) != ''
 						){
 
 							ColorSize.Data[Row.cells[2].value] = {

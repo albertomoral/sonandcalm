@@ -40,10 +40,10 @@ function (
 		if(Time) { Self.hide(Time); }
 	}
 
-	$(function() {
+	jQuery(function() {
 
-		Self.$Notifications = $('<div class="Notifications"></div>');
-		$('.poeticsoft-woo-agora').append(Self.$Notifications);
+		Self.$Notifications = jQuery('<div class="Notifications"></div>');
+		jQuery('.poeticsoft-woo-agora').append(Self.$Notifications);
 	});
 
 	return Self;

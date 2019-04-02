@@ -22,7 +22,7 @@ APP.directive(
 
           $scope.$apply(function() {
 
-            $scope.SelectedCategorieId = $(E.currentTarget).data('categorieid');
+            $scope.SelectedCategorieId = jQuery(E.currentTarget).data('categorieid');
           });
         }
         
@@ -71,7 +71,7 @@ APP.directive(
 
         $Selection.each(function(F) {
 
-          SelectedFamilies.push($(this).data('family'));
+          SelectedFamilies.push(jQuery(this).data('family'));
         });
 
         for (var i = 0; i < Families.length; i++) {

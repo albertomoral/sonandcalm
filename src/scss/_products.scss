@@ -30,6 +30,14 @@
 					/* text-align: right; */
 					padding: 5px;
 				}
+
+				.k-grid-header {
+
+					th:not(:first-child) {
+
+						text-align: center;
+					}
+				}
 				
 				.k-grid-content { 
 
@@ -99,9 +107,8 @@
 						}
 					}
 
-					td.Data {
-
-						cursor: help;
+					td.Stock {
+						
 						text-align: center;
 					}
 
@@ -132,6 +139,7 @@
 					td.Status {
 
 						text-align: center;
+						cursor: help;
 
 						.k-icon {
 

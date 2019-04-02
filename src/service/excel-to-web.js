@@ -21,7 +21,7 @@ function (
 		return Name.split(' ')
 							 .map(function(Word) {
 
-								return _.upperFirst(Word.toLowerCase());
+								return s.capitalize(Word, true);
 							})
 							.join(' ');
 	}
@@ -38,17 +38,17 @@ function (
 			parent_sku: Product.Parent,
 			type: Product.Type,
 			name: Product.Producto,
-			category_ids: Product.Categories,
-			sale_price: Product['Precio General'],
+			category_ids: Product.Categories || [],
+			regular_price: Product['Precio General'] || 0,
 			/* Calculated from ColorSize */
 			attributes: {
-				attribute_color: Product.Attributes && Product.Attributes.Color,
-				attribute_size: Product.Attributes && Product.Attributes.Size
-			},	
+				color: Product.Attributes && Product.Attributes.Color,
+				size: Product.Attributes && Product.Attributes.Size
+			},
 			/* Calculated from Images */
 			image_id: Product.ImageId,
-			gallery_image_ids: Product.GalleryImageIds,
-			variation_gallery_images: Product.VariationGalleryImages,				
+			gallery_image_ids: Product.GalleryImageIds || [],
+			variation_gallery_images: Product.VariationGalleryImages ||[],				
 			/* Calculated from Stock */
 			stock_quantity: 1
 		};
@@ -66,7 +66,6 @@ function (
 
 													return Image.attid;
 												});
-
 		Product.Parent = null;
 		Product.Type = 'simple';
 		Product.Producto = formatName(Product.Producto);
@@ -82,7 +81,7 @@ function (
 														 (ProductImages.length > 0 ) &&
 															ProductImages;
 
-		Products.NewData[SKU] = formatProduct(Product);
+		Products.AgoraData[SKU] = formatProduct(Product);
 	}
 
 	/* Add variable product */
@@ -92,12 +91,12 @@ function (
 		var Product = {
 			Parent: null,
 		 'Código Barras': SKU,
-			Type: 'variable'
+			Type: 'variable' 
 		}
 
 		/* Name as minimun common from variations */
 
-		Product.Producto = _.intersection(...Group.map(function(P) {
+		Product.Producto = formatName(_.intersection(...Group.map(function(P) {
 			
 			return P.Producto.split(' ');
 		})).filter(function(Part) {
@@ -111,9 +110,10 @@ function (
 		})
 		.map(function(Word) {
 
-			return _.upperFirst(Word.toLowerCase());
+			// return _.upperFirst(Word.toLowerCase());
+			return Word.toLowerCase();
 		})
-		.join(' ');
+		.join(' '));
 
 		/* Categories as unique from variations (because family in variations can change?) */
 
@@ -122,16 +122,48 @@ function (
 			return Categories.FamilyCategories[P.Familia] || [];
 		}));
 
-		/* Variations as uniq sum of color & Size of variations */
+		/* Attributes as uniq sum of color & Size of variations */
 
-		Product.Variations = {
+		Product.Attributes = {
 			Color: _.uniq(Group.map(function(P) { return P.Color; })).join('|'),
 			Size: _.uniq(Group.map(function(P) { return P.Size; })).join('|')
 		}
 
+		/*
+			Image as first image from first variation 
+			TODO remove from variations?
+		*/
+
+		var GroupImages = Group.reduce(function(Accumulate, Variation) {
+
+			var VariationSKU = Variation['Código Barras'];
+			var VariationImages = Images.Group[VariationSKU];
+			
+			if(VariationImages) {
+
+				var VariationImagesIds = VariationImages
+				.items
+				.map(
+					function(Image) { 
+						return Image.attid;
+					}
+				);
+
+				Accumulate = Accumulate.concat(VariationImagesIds);
+			}
+
+			return Accumulate;
+
+		}, []);
+
+		if(GroupImages.length > 0) {
+
+			Product.ImageId = GroupImages[0];
+		}
+
 		/* Add variable product */
 
-		Products.NewData[SKU] = formatProduct(Product);	
+		Products.AgoraData[SKU] = formatProduct(Product);	
 
 		/* Variations */
 
@@ -149,11 +181,33 @@ function (
 		Product.Attributes = {
 			Color: Product.Color || '',
 			Size: Product.Size || ''
+		};		
+
+		/* Image as first image from group, rest are gallery images */
+
+		var VariationImages = Images.Group[SKU];
+		var VariationImagesIds;
+			
+		if(VariationImages) {
+
+			VariationImagesIds = VariationImages
+			.items
+			.map(
+				function(Image) { 
+					return Image.attid;
+				}
+			);
+		}
+
+		if(VariationImagesIds && VariationImagesIds.length > 0) {
+
+			Product.ImageId = VariationImagesIds.shift();
+			Product.VariationGalleryImages = VariationImagesIds;
 		}
 
 		/* Add variation product */
 
-		Products.NewData[SKU] = formatProduct(Product);	
+		Products.AgoraData[SKU] = formatProduct(Product);
 	}
 
 	/* Excel rows to Product List Struct */
@@ -174,7 +228,7 @@ function (
 				Row[Products.FootPrint.FinalFields[column]] = value.value;
 			});
 
-			var SKU = $.trim(Row['Código Barras']);
+			var SKU = jQuery.trim(Row['Código Barras']);
 			if(SKU) {
 
 				if(Row.Familia) { Families[Row.Familia] = '';	} // Dummy for unique values
@@ -186,9 +240,9 @@ function (
 
 		Categories.updateFamilies(Object.keys(Families));
 
-		/* Initialize NewData array */
+		/* Initialize AgoraData array */
 
-		Products.NewData = {};
+		Products.AgoraData = {};
 
 		/* Group by Parent to create variations */
 
@@ -228,7 +282,7 @@ function (
 
 			$timeout(function() {
 
-				Products.processDifferences();
+				Products.updateFromAgora();
 
 				$rootScope.$broadcast('closedialog');
 

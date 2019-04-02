@@ -39,12 +39,9 @@ function() {
 		template: `<div class="poeticsoft-woo-agora">
 			<div kendo-tab-strip>
 				<ul>
-					<!-- li>Color Size</li -->
-					<li>Agora</li>
 					<li class="k-state-active">Web</li>
-				</ul>                      
-				<!-- poeticsoft-woo-agora-color-size></poeticsoft-woo-agora-color-size -->                 
-				<poeticsoft-woo-agora-excel></poeticsoft-woo-agora-excel> 
+					<li>Agora</li>
+				</ul>
 				<div class="Web">
 					<div kendo-tab-strip>
 						<ul>
@@ -55,6 +52,18 @@ function() {
 						<poeticsoft-woo-agora-products></poeticsoft-woo-agora-products>                        
 						<poeticsoft-woo-agora-categories></poeticsoft-woo-agora-categories>
 						<poeticsoft-woo-agora-images></poeticsoft-woo-agora-images>
+					</div>
+				</div> 
+				<div class="Agora"> 
+					<div kendo-tab-strip>
+						<ul>
+							<!-- li>Color Size</li -->
+							<li class="k-state-active">Products</li>
+							<li>Stock</li>
+						</ul>                                     
+						<!-- poeticsoft-woo-agora-color-size></poeticsoft-woo-agora-color-size --> 
+						<poeticsoft-woo-agora-data></poeticsoft-woo-agora-data>                      
+						<poeticsoft-woo-agora-stock></poeticsoft-woo-agora-stock> 
 					</div>
 				</div>
 			</div>
