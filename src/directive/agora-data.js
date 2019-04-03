@@ -117,7 +117,7 @@ APP.directive(
 				Products.FootPrint.NoEdit.split('')
 				.forEach(function(ColumnIndex) {
 
-					var Range = ColumnIndex + '2:' + ColumnIndex + RowCount;
+					var Range = ColumnIndex + '1:' + ColumnIndex + RowCount;
 					ProductsSheet.range(Range).enable(false)
 				});
 

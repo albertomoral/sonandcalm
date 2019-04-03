@@ -94,6 +94,15 @@ APP.directive(
 					);
 				}
 
+				//  Disable edit				
+
+				Products.FootPrint.Stock.NoEdit.split('')
+				.forEach(function(ColumnIndex) {
+
+					var Range = ColumnIndex + '1:' + ColumnIndex + RowCount;
+					InventarioSheet.range(Range).enable(false)
+				});
+
 				// Extract data				
 
 				$timeout(function() {				

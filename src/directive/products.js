@@ -68,7 +68,7 @@ function() {
       {
         field: 'stock_quantity',
         title: 'Stock',
-        template: '<div title="Web | Last saved export | Last apply">{{ getStock(dataItem) }}</div>',
+        template: '<div title="Actual in web | Last saved export | Last apply">{{ getStock(dataItem) }}</div>',
         width: 100,
         attributes: { class: 'Stock' }
       },

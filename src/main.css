@@ -352,7 +352,8 @@
         .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Type div.variation {
           background-color: #82b3d8; }
       .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Stock {
-        text-align: center; }
+        text-align: center;
+        cursor: help; }
       .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Image {
         text-align: center; }
         .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Image div:empty:before {

@@ -13,11 +13,17 @@ function (
 
 	var Self = {};
 
-	/* Local data for process */
+	/* -------------------------------------------------------------------------
+		 Local data for process 
+	*/
 
 	Self.WebData = {}; 		// Products loaded from web
 	Self.AgoraData = {}; 	// Products from agora export 
 	Self.TempData = {};		// Process buffer
+
+	/* -------------------------------------------------------------------------
+		 Calculate changes betweeen web data and actual agora data + stock 
+	*/
 
 	var PlainCompares = [
 		'parent_sku',
@@ -34,7 +40,7 @@ function (
 		'variation_gallery_images'
 	]
 
-	function updateData(SKU) {
+	function calculateChanges(SKU) {
 
 		/* Changes array */
 
@@ -91,7 +97,11 @@ function (
 			Self.TempData[SKU].status = 'changed';
 			Self.TempData[SKU].changes.push('size');
 		}
-	}
+	}	
+
+	/* -------------------------------------------------------------------------
+		 Update process buffer with data from agora excel 
+	*/
 
 	Self.updateFromAgora = function() {
 
@@ -118,14 +128,18 @@ function (
 
 			/* Update if changed */
 
-			else { updateData(SKU); }
+			else { calculateChanges(SKU); }
 
 		});
 
 		/* visualize result */
 
 		visualize();
-	}
+	}		
+
+	/* -------------------------------------------------------------------------
+		Converts TempData in an array for consuming in Kendo Grid
+	*/
 
 	function visualize() {
 
@@ -147,9 +161,11 @@ function (
 		Self.DS.read({ data: VisualizeData });
 
 		$rootScope.$broadcast('productschanged');
-	}
+	}			
 
-	/* Data structure for visualization */
+	/* -------------------------------------------------------------------------
+		Data structure for kendo grid
+	*/
 
 	Self.DS = new kendo.data.TreeListDataSource ({
 		transport: {
@@ -193,7 +209,9 @@ function (
 		}
 	});
 
-	/* Load Web Products Data */
+	/* -------------------------------------------------------------------------
+		Load Web Products Data
+	*/
 
 	Self.loadFromWeb = function() {
 
@@ -234,7 +252,9 @@ function (
 		return $Q.promise;
 	}
 
-	/* Save conversion to web and update woo products */
+	/* -------------------------------------------------------------------------
+		Save conversion to web and update woo products
+	*/
 
 	var ProcessFragments = [
 		'deleted_variation',	
@@ -319,20 +339,29 @@ function (
 		return $Q.promise;
 	}
 
-	/* Update stock in actual products */
+	/* -------------------------------------------------------------------------
+		Update stock in actual products
+	*/
 
 	Self.updateStock = function() {
 
 		var $Q = $q.defer();
 				
-		Object.keys(Self.TempData)
+		Object.keys(Stock.Data)
 		.forEach(function(Key) {
 
-			if(Stock.Data[Key]) {				
+			if(Self.TempData[Key]) {				
 
 				Self.TempData[Key].new_stock = Stock.Data[Key].Value;
+
+				if(Self.TempData[Key].stock_quantity != Self.TempData[Key].new_stock) {
+					
+					Self.TempData[Key].status = 'changed';
+					Self.TempData[Key].changes = Self.TempData[Key].changes || [];
+					Self.TempData[Key].changes.push('stock');
+				}
 			}
-		})
+		});
 
 		visualize();
 
