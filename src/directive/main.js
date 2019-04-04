@@ -39,8 +39,8 @@ function() {
 		template: `<div class="poeticsoft-woo-agora">
 			<div kendo-tab-strip>
 				<ul>
-					<li class="k-state-active">Web</li>
-					<li>Agora</li>
+					<li>Web</li>
+					<li class="k-state-active">Agora</li>
 				</ul>
 				<div class="Web">
 					<div kendo-tab-strip>

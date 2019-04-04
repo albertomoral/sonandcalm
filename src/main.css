@@ -219,7 +219,7 @@
     .poeticsoft-woo-agora .poeticsoft-woo-agora-stock .SpreadsheetTools .k-widget > button {
       display: none; }
     .poeticsoft-woo-agora .poeticsoft-woo-agora-stock .SpreadsheetTools .k-widget.k-upload {
-      width: calc(100% - 270px); }
+      width: calc(100% - 300px); }
       .poeticsoft-woo-agora .poeticsoft-woo-agora-stock .SpreadsheetTools .k-widget.k-upload .k-button {
         margin: 5px; }
       .poeticsoft-woo-agora .poeticsoft-woo-agora-stock .SpreadsheetTools .k-widget.k-upload .k-file-extension-wrapper {
@@ -244,7 +244,7 @@
           top: 2px;
           right: 6px; }
   .poeticsoft-woo-agora .poeticsoft-woo-agora-stock .SpreadsheetTools .Actions {
-    width: 270px;
+    width: 300px;
     display: flex;
     align-items: center;
     justify-content: flex-end; }
@@ -316,7 +316,9 @@
     .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-header {
       /* text-align: right; */
       padding: 5px; }
-    .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-header th:not(:first-child) {
+    .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-header tr:first-child th:not(:first-child) {
+      text-align: center; }
+    .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-header tr:not(:first-child) th {
       text-align: center; }
     .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content {
       height: calc(100% - 71px) !important; }
@@ -351,9 +353,12 @@
           background-color: #3091d8; }
         .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Type div.variation {
           background-color: #82b3d8; }
-      .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Stock {
-        text-align: center;
-        cursor: help; }
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Stock,
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Web,
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Last,
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Actual,
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Export {
+        text-align: center; }
       .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Image {
         text-align: center; }
         .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Image div:empty:before {

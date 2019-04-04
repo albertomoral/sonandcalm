@@ -48,9 +48,7 @@ function (
 			/* Calculated from Images */
 			image_id: Product.ImageId,
 			gallery_image_ids: Product.GalleryImageIds || [],
-			variation_gallery_images: Product.VariationGalleryImages ||[],				
-			/* Calculated from Stock */
-			stock_quantity: 1
+			variation_gallery_images: Product.VariationGalleryImages || []
 		};
 	}
 

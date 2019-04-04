@@ -30,8 +30,7 @@ function (
 		'type',
 		'name',
 		'image_id',
-		'sale_price',
-		'stock_quantity'
+		'sale_price'
 	]
 
 	var ArrayCompares = [
@@ -120,7 +119,7 @@ function (
 		.forEach(function(SKU) {
 
 			Self.TempData[SKU] = Self.AgoraData[SKU];
-			Self.TempData[SKU].status = 'updated';			
+			Self.TempData[SKU].status = 'updated';
 
 			/* Mark as new if not in web */
 
@@ -130,12 +129,26 @@ function (
 
 			else { calculateChanges(SKU); }
 
+			/* Save stock as in web */
 		});
 
 		/* visualize result */
 
 		visualize();
-	}		
+	}	
+
+	/* -------------------------------------------------------------------------
+		Calculate stock when data ready
+	*/	
+
+	$rootScope.$on('stockready', function() {
+		
+		if(Ready) {
+
+			Self.updateStock(); 			
+			visualize();
+		}
+	});
 
 	/* -------------------------------------------------------------------------
 		Converts TempData in an array for consuming in Kendo Grid
@@ -213,6 +226,8 @@ function (
 		Load Web Products Data
 	*/
 
+	var Ready = false; // Flag to synchro stock
+
 	Self.loadFromWeb = function() {
 
 		var $Q = $q.defer();
@@ -238,14 +253,22 @@ function (
 
 					Product.status = 'updated';
 					Product.parent_sku = Product.parent_sku || null; // Tree View
-					Self.WebData[Product.sku] = Product;						
-					Self.AgoraData[Product.sku] = Product;							
-					Self.TempData[Product.sku] = Product;		
+					Self.WebData[Product.sku] = Product;
 				});
+
+										
+				Self.AgoraData = JSON.parse(JSON.stringify(Self.WebData));						
+				Self.TempData = JSON.parse(JSON.stringify(Self.WebData));
 
 				/* Visualize */
 
-				visualize();
+				Ready = true;
+
+				if(Stock.OldReady && Stock.NewReady) {					
+
+					Self.updateStock();					
+					visualize();
+				}
 			}
 		);
 
@@ -272,7 +295,7 @@ function (
 
 		var $Q = $q.defer();
 
-		/* same as Self.TempData but may be in a future grid will be editable */
+		/* Same as Self.TempData but may be in a future grid will be editable */
 
 		var ProductsData = Self.DS.data().toJSON();
 		
@@ -306,14 +329,21 @@ function (
 			});
 		});
 
+		console.log(Queue);
+
 		function processQueue() {
 
-			if(Queue.length == 0) {
+			if(Queue.length == 0) {	
 
-				return $Q.resolve();
+				$rootScope.$emit('notifydialog', { text: 'Updating actual data...' });
+
+				// Self.loadFromWeb()
+				// .then($Q.resolve);
 			}
 
 			var Chunk = Queue.shift();
+
+			console.log(Chunk);
 
 			$http.post(
 				'/wp-json/poeticsoft/woo-products-process',
@@ -321,11 +351,9 @@ function (
 			)
 			.then(function(Response) {
 			
-				if(Response.data.Status.Code == 'KO') {						
+				if(Response.data.Status.Code == 'KO') {	
 
-					$Q.resolve();				
-
-					return Notifications.show({ errors: Response.data.Status.Reason });	
+					Notifications.show({ errors: Response.data.Status.Reason });	
 				}
 				
 				$rootScope.$emit('notifydialog', { text: Response.data.Status.Message }); 
@@ -334,32 +362,68 @@ function (
 			});
 		}
 
-		processQueue();		
+
+		if(Queue.length > 0) {
+			
+			processQueue();
+		}	else {
+			
+			$rootScope.$emit('notifydialog', { text: 'Nothing to update...' });
+
+			$timeout(function() {
+				
+				$Q.resolve();
+			}, 200);
+		}
 
 		return $Q.promise;
 	}
 
 	/* -------------------------------------------------------------------------
 		Update stock in actual products
-	*/
+	*/	
+
+	function calculateStock(SKU) {				
+
+		if(Self.TempData[SKU].type == 'variable') {
+
+			Self.TempData[SKU].stock_quantity = '';
+			Self.TempData[SKU].last_stock_quantity = '';
+			Self.TempData[SKU].actual_stock_quantity = '';
+			Self.TempData[SKU].export_stock_quantity = '';
+			
+		} else {
+
+			var StockQuantity = Self.WebData[SKU] ? Self.WebData[SKU].stock_quantity : null;
+
+			Self.TempData[SKU].stock_quantity = StockQuantity;
+			Self.TempData[SKU].last_stock_quantity = (Stock.OldData[SKU] && Stock.OldData[SKU].Value) || '-';
+			Self.TempData[SKU].actual_stock_quantity = (Stock.NewData[SKU] && Stock.NewData[SKU].Value) || '-';
+			Self.TempData[SKU].export_stock_quantity = Self.TempData[SKU].stock_quantity ?
+																										Self.TempData[SKU].actual_stock_quantity - 
+																										(
+																												Self.TempData[SKU].last_stock_quantity - 
+																												Self.TempData[SKU].stock_quantity
+																										) 
+																										:
+																										Self.TempData[SKU].actual_stock_quantity;
+		}
+	}
 
 	Self.updateStock = function() {
 
 		var $Q = $q.defer();
 				
-		Object.keys(Stock.Data)
+		Object.keys(Self.TempData)
 		.forEach(function(Key) {
 
-			if(Self.TempData[Key]) {				
+			calculateStock(Key);
 
-				Self.TempData[Key].new_stock = Stock.Data[Key].Value;
-
-				if(Self.TempData[Key].stock_quantity != Self.TempData[Key].new_stock) {
-					
-					Self.TempData[Key].status = 'changed';
-					Self.TempData[Key].changes = Self.TempData[Key].changes || [];
-					Self.TempData[Key].changes.push('stock');
-				}
+			if(Self.TempData[Key].stock_quantity != Self.TempData[Key].export_stock_quantity) {
+				
+				Self.TempData[Key].status = 'changed';
+				Self.TempData[Key].changes = Self.TempData[Key].changes || [];
+				Self.TempData[Key].changes.push('stock');
 			}
 		});
 

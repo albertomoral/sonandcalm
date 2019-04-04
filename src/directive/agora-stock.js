@@ -14,7 +14,11 @@ APP.directive(
 			Stock
 		) {
 			
-			$scope.allowApply = false;
+			$scope.AllowApply = false;
+			$scope.DataChanged = false;
+			$scope.StockChanged = true;
+
+			var InventarioSheet;
 
 			// Loader
 
@@ -33,29 +37,31 @@ APP.directive(
 					
 					$scope.AgoraStockKendoSpreadsheet
 					.fromFile(e.files[0].rawFile)
-					.then(sheetLoaded);
+					.then(function() {
+						
+						sheetLoaded(true);
+					});
 				}
 			}
 
 			function sheetLoaded() {
-				
-				CanProcess = true;
 
 				$rootScope.$broadcast('opendialog', {
-					Title: 'Stock process',
-					cancel: function() {
-
-						CanProcess = false;
-						return false;
-					}
+					Title: 'Stock process'
 				});
 
 				// There is a sheet "Inventario"
 
 				$rootScope.$emit('notifydialog', { text: 'Searching Inventario sheet...' });
 
-				var InventarioSheet = $scope.AgoraStockKendoSpreadsheet.sheetByName('Inventario');
-				if(!InventarioSheet) {
+				InventarioSheet = $scope.AgoraStockKendoSpreadsheet.sheetByName('Inventario');
+				if(!InventarioSheet) {							
+
+					$scope.AgoraStockKendoSpreadsheet.sheets()
+					.forEach(function(Sheet) {
+
+						Sheet.range(kendo.spreadsheet.SHEETREF).clear()
+					});
 					
 					$rootScope.$emit('closedialog');
 					return Notifications.show({ errors: 'Load an Excel file with an "Inventario" sheet' });
@@ -82,7 +88,13 @@ APP.directive(
 
 					$rootScope.$emit('notifydialog', { text: 'Extracting data...' });
 
-				} else {
+				} else {							
+
+					$scope.AgoraStockKendoSpreadsheet.sheets()
+					.forEach(function(Sheet) {
+
+						Sheet.range(kendo.spreadsheet.SHEETREF).clear()
+					});
 			
 					$rootScope.$emit('closedialog');
 					return Notifications.show(
@@ -107,7 +119,7 @@ APP.directive(
 
 				$timeout(function() {				
 
-					Stock.Data = {};
+					Stock.NewData = {};
 
 					var Rows = InventarioSheet.toJSON().rows;
 					Rows.shift(); // Extract field names
@@ -120,6 +132,9 @@ APP.directive(
 						});
 
 						if(!SKUCell) return;
+						var SKU = $.trim(SKUCell.value).split(' ').join('').split(',').join('.');
+
+						if(SKU == '') return;
 
 						var StockCell = Row.cells.find(function(Cell) {
 
@@ -128,8 +143,8 @@ APP.directive(
 
 						if(!StockCell) return;
 
-						Stock.Data[SKUCell.value] = {
-							Value: StockCell.value
+						Stock.NewData[SKU] = {
+							Value: $.trim(StockCell.value)
 						};
 					});
 
@@ -137,7 +152,12 @@ APP.directive(
 
 					$timeout(function() {
 
-						$scope.allowApply = true;
+						$scope.AllowApply = true;
+						$scope.DataChanged = true;
+						
+						Stock.NewReady = true;
+						$rootScope.$broadcast('stockready');
+
 						$rootScope.$emit('closedialog');
 
 					}, 200);
@@ -149,49 +169,128 @@ APP.directive(
 					home: false,
 					insert: false,
 					data: false
+				},
+				excel: {
+					fileName: 'WEB-AGORA-STOCK.xlsx'
 				}
-			};
+			};	
 
 			// Apply stock to web products
 
 			$scope.applyToWebProducts = function() {	
 				
-				$scope.allowApply = false;
+				$scope.AllowApply = false;
 
 				$rootScope.$broadcast('opendialog', {
 					Title: 'Apply stock'
-				});	
-				$rootScope.$emit('notifydialog', { text: 'Updating web products' });			      
+				});
+				$rootScope.$emit('notifydialog', { text: 'Updating web products' });
 
 				$timeout(function() {
 
 					Products.updateStock()
 					.then(function() {
-							
-						$rootScope.$emit('notifydialog', { text: 'Saving stock data' });
+
+						var Data = {
+							InventarioSheetData: InventarioSheet.toJSON()
+						};		
+
+						$rootScope.$emit('notifydialog', { text: 'Saving stock data' });			
 
 						$http.post(
-							'/wp-json/poeticsoft/woo-products-stock-update',
-							Stock.Data
+							'/wp-json/poeticsoft/woo-agora-excel-stock-update',
+							Data
 						)
 						.then(function(Response) {
-		
+
 							var Code = Response.data.Status.Code;
-							if(Code == 'OK'){ 
-		
-								$rootScope.$emit('notifydialog', { text: Response.data.Status.Message });
-		
+							if(Code == 'OK'){
+			
+								$scope.AllowApply = true;
+								$scope.DataChanged = false;
+
 							} else {
-		
-								$rootScope.$emit('notifydialog', { text: 'Error: ' + Response.data.Status.Reason }); 
+
+								Notifications.show({ errors: Response.data.Status.Reason });
 							}
 
 							$rootScope.$emit('closedialog');
-							$scope.allowApply = true;
-						});	
+						});
 					})
 				}, 200);			
+			}					
+
+			/* Load last excel saved */
+
+			$scope.loadData = function() {
+			
+				$scope.AllowApply = false;
+
+				$rootScope.$broadcast('opendialog', {
+					Title: 'Loading stock data'
+				});
+			
+				$scope.allowProcessing = false;
+
+				$http.get('/wp-json/poeticsoft/woo-agora-excel-stock-read')
+				.then(function(Response) {
+
+					var Code = Response.data.Status.Code;
+					if(Code == 'OK'){ 
+
+						if(Response.data.Data.length == 0) {
+
+							$rootScope.$emit('notifydialog', { text: 'No data' });
+
+							return $timeout(function() {
+
+								$rootScope.$emit('closedialog');
+								
+							}, 200);
+						}
+
+						var InventarioSheetData = Response.data.Data;
+						delete InventarioSheetData.activeCell;
+						delete InventarioSheetData.selection;
+
+						$scope.AgoraStockKendoSpreadsheet.fromJSON({
+							sheets: [InventarioSheetData]
+						});				
+						
+						InventarioSheet = $scope.AgoraStockKendoSpreadsheet.activeSheet();
+						RowCount = InventarioSheet._rows._count;
+
+						$rootScope.$emit('notifydialog', { text: Response.data.Status.Message });
+
+						$timeout(function() {
+
+							$rootScope.$emit('closedialog');
+
+							sheetLoaded();
+							
+						}, 200);
+
+					} else {
+
+						Notifications.show({ errors: Response.data.Status.Reason });
+					}
+				});
 			}
+
+			$scope.download = function() {
+
+				$scope.AgoraStockKendoSpreadsheet.saveAsExcel();
+			}
+
+			// Load Agora Stock data
+			
+			$scope.$on("kendoWidgetCreated", function(event, widget){
+      
+        if (widget === $scope.AgoraStockKendoSpreadsheet) { 
+					
+					$scope.loadData();
+				}
+			});
 		}
 
 		return {
@@ -209,8 +308,18 @@ APP.directive(
 					<div class="Actions">
 						<button class="k-button"
 										ng-click="applyToWebProducts()"
-										ng-disabled="!allowApply">
+										ng-disabled="!AllowApply">
 							Apply
+						</button>
+						<button class="k-button"
+										ng-click="loadData()"
+										ng-disabled="!DataChanged">
+							Revert
+						</button>
+						<button class="k-button"
+										ng-click="download()"
+										ng-disabled="!StockChanged">
+							Download
 						</button>
 					</div>
 				</div>

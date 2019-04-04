@@ -62,7 +62,13 @@ APP.directive(
 				$rootScope.$emit('notifydialog', { text: 'Searching Products sheet...' });
 
 				ProductsSheet = $scope.AgoraDataKendoSpreadsheet.sheetByName('Productos');
-				if(!ProductsSheet) {
+				if(!ProductsSheet) {						
+
+					$scope.AgoraDataKendoSpreadsheet.sheets()
+					.forEach(function(Sheet) {
+
+						Sheet.range(kendo.spreadsheet.SHEETREF).clear()
+					});
 					
 					$rootScope.$emit('closedialog');
 					return Notifications.show({ errors: 'Load an Excel file with a "Products" sheet' });
@@ -84,8 +90,14 @@ APP.directive(
 					$rootScope.$emit('notifydialog', { text: 'Sheet valid, processsing...' });
 					$timeout(updateSheet, 200);
 
-				} else {
-			
+				} else {					
+
+					$scope.AgoraDataKendoSpreadsheet.sheets()
+					.forEach(function(Sheet) {
+
+						Sheet.range(kendo.spreadsheet.SHEETREF).clear()
+					});
+
 					$rootScope.$emit('closedialog');
 					return Notifications.show(
 						{ 

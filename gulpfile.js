@@ -61,7 +61,6 @@ gulp.task('compile_sonandcalm', ['compile_scss'], function() {
 		'./src/service/datasource-stock.js',	
 		'./src/service/excel-to-web.js',
 		'./src/service/notifications.js',
-		'./src/service/loader.js',
 		'./src/service/utils.js',
 
 		'./src/directive/main.js',

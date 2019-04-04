@@ -9,9 +9,7 @@ function() {
   function controller(
     $rootScope,
     $scope, 
-    $timeout,
     $window, 
-    ExcelToWeb,
     Products, 
     Categories,
     Images,
@@ -29,28 +27,15 @@ function() {
 
     function checkValue(Var) {
 
-      if(typeof Var == 'undefined') {
+      if(typeof Var == 'undefined' || Var === null) {
 
-        return '-';
+        return '0';
       } 
+
       return Var;
     }
 
-    $scope.getStock = function(Item) {
-
-      if(Item.type == 'variable') { 
-
-        return '';
-      }
-
-      var SavedStockValue = Stock.Data[Item.sku] ? checkValue(Stock.Data[Item.sku].Value) : '-';
-
-      return Item.stock_quantity + ' | ' +
-             SavedStockValue + ' | ' + 
-             checkValue(Item.new_stock);
-    }
-
-    /* Columns config */
+    /* Columns config */    
 
     var Columns = [
       {
@@ -66,12 +51,35 @@ function() {
         attributes: { class: 'Type' }
       },
       {
-        field: 'stock_quantity',
         title: 'Stock',
-        template: '<div title="Actual in web | Last saved export | Last apply">{{ getStock(dataItem) }}</div>',
-        width: 100,
+        columns: [
+          {
+            field: 'stock_quantity',
+            title: 'Web',
+            width: 60,
+            attributes: { class: 'Web' }
+          },
+          {
+            field: 'last_stock_quantity',
+            title: 'Last',
+            width: 60,
+            attributes: { class: 'Last' }
+          },
+          {
+            field: 'actual_stock_quantity',
+            title: 'Actual',
+            width: 60,
+            attributes: { class: 'Actual' }
+          },
+          {
+            field: 'export_stock_quantity',
+            title: 'Export',
+            width: 60,
+            attributes: { class: 'Export' }
+          }
+        ],
         attributes: { class: 'Stock' }
-      },
+      }, 
       {
         title: 'Image/s',
         width: 70,
@@ -111,9 +119,6 @@ function() {
 
     /* Tool bar */
 
-    var $RevertButton;
-    var $SaveButon;
-
     function revertFromWeb() {       
 
       $rootScope.$broadcast('opendialog', {
@@ -136,11 +141,14 @@ function() {
       });
       $rootScope.$emit('notifydialog', { text: 'Saving...' }); 
 
-      Products.saveToWeb()
+      Stock.saveState()
       .then(function() {
 
-        // $SaveButton.prop('disabled', true);
-        $rootScope.$emit('closedialog');
+        Products.saveToWeb()
+        .then(function() {
+
+          $rootScope.$emit('closedialog');
+        });
       });
     }    
 
@@ -155,6 +163,7 @@ function() {
 
       $scope.ProductKendoTreeList.resize();
     }
+
     /* Data tooltip */
 
     function dataContent(E) {
@@ -239,14 +248,6 @@ function() {
           function() {
 
             DataTooltip.show(jQuery(this));
-          }
-        )
-        .on(
-          'mouseleave',
-          '.Status',
-          function() {
-
-            // DataTooltip.hide();
           }
         );
 
