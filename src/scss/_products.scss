@@ -216,7 +216,7 @@
 	text-align: left;
 	background-color: #fff;
 	color: #888;
-	padding: 10px;
+	padding: 5px 10px;
 
 	.Field {
 
@@ -243,7 +243,31 @@
 
 		.Value {
 
-			width: 55%
+			width: 55%;
+
+			div {
+
+				padding: 0 0 5px 0;
+
+				span {
+
+					display: inline-block;
+					width: 75%;
+					vertical-align: top;
+
+					&:first-child {
+
+						width: 20%;
+					}
+				}
+			}
+
+			div + div {
+
+				border: solid #ccc;
+				border-width: 1px 0 0 0;
+				padding: 5px 0;
+			}
 		}
 	}
 }

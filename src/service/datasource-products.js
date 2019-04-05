@@ -8,7 +8,8 @@ function (
 	$timeout,
 	$rootScope,
 	Stock,
-	Notifications
+	Notifications,
+	Loader
 ) {
 
 	var Self = {};
@@ -35,11 +36,15 @@ function (
 
 	var ArrayCompares = [
 		'category_ids',
-		'gallery_image_ids',
-		'variation_gallery_images'
+		'gallery_image_ids'
 	]
 
 	function calculateChanges(SKU) {
+
+		/*
+		console.log(Self.WebData[SKU]); 
+		console.log(Self.AgoraData[SKU]);
+		*/
 
 		/* Changes array */
 
@@ -64,10 +69,10 @@ function (
 
 		ArrayCompares.forEach(function(Field) {
 
-			if(
-				[].concat(Self.WebData[SKU][Field]).sort().join() != 
-				[].concat(Self.AgoraData[SKU][Field]).sort().join()
-			) {
+			var WebArray = [].concat(Self.WebData[SKU][Field]).sort().join();
+			var AgoraArray = [].concat(Self.AgoraData[SKU][Field]).sort().join();
+
+			if(WebArray != AgoraArray) {
 
 				Self.TempData[SKU][Field] = Self.AgoraData[SKU][Field];
 				Self.TempData[SKU].status = 'changed';
@@ -77,25 +82,29 @@ function (
 
 		/* Attributes */
 
-		if(
-			Self.WebData[SKU].attributes.color != 
-			Self.AgoraData[SKU].attributes.color
-		) {
+		var WebColor = Self.WebData[SKU].attributes.color.split('|').sort().join('|');
+		var AgoraColor = Self.AgoraData[SKU].attributes.color.split('|').sort().join('|');
 
-			Self.TempData[SKU].attributes.color = Self.AgoraData[SKU].attributes.color;
+		if(WebColor != AgoraColor) {
+
+			Self.TempData[SKU].attributes.color = AgoraColor;
 			Self.TempData[SKU].status = 'changed';
 			Self.TempData[SKU].changes.push('color');
 		}		
 
-		if(
-			Self.WebData[SKU].attributes.size != 
-			Self.AgoraData[SKU].attributes.size
-		) {
+		var WebSize = Self.WebData[SKU].attributes.size.split('|').sort().join('|');
+		var AgoraSize = Self.AgoraData[SKU].attributes.size.split('|').sort().join('|');
 
-			Self.TempData[SKU].attributes.size = Self.AgoraData[SKU].attributes.size;
+		if(WebSize !=  AgoraSize) {
+
+			Self.TempData[SKU].attributes.size = AgoraSize;
 			Self.TempData[SKU].status = 'changed';
 			Self.TempData[SKU].changes.push('size');
 		}
+
+		/* Stock */
+
+		calculateStock(SKU);
 	}	
 
 	/* -------------------------------------------------------------------------
@@ -135,20 +144,7 @@ function (
 		/* visualize result */
 
 		visualize();
-	}	
-
-	/* -------------------------------------------------------------------------
-		Calculate stock when data ready
-	*/	
-
-	$rootScope.$on('stockready', function() {
-		
-		if(Ready) {
-
-			Self.updateStock(); 			
-			visualize();
-		}
-	});
+	}
 
 	/* -------------------------------------------------------------------------
 		Converts TempData in an array for consuming in Kendo Grid
@@ -206,8 +202,7 @@ function (
 					},
 					/* Calculated from Images */
 					'image_id': { type: 'number', editable: false },
-					'gallery_image_ids': [],					
-					'variation_gallery_images': [],	
+					'gallery_image_ids': [],
 					/* Calculated from Stock */	
 					'stock_quantity': { type: 'number', editable: false },
 					/* Mark */	
@@ -225,8 +220,6 @@ function (
 	/* -------------------------------------------------------------------------
 		Load Web Products Data
 	*/
-
-	var Ready = false; // Flag to synchro stock
 
 	Self.loadFromWeb = function() {
 
@@ -260,15 +253,9 @@ function (
 				Self.AgoraData = JSON.parse(JSON.stringify(Self.WebData));						
 				Self.TempData = JSON.parse(JSON.stringify(Self.WebData));
 
-				/* Visualize */
+				Self.updateStock();
 
-				Ready = true;
-
-				if(Stock.OldReady && Stock.NewReady) {					
-
-					Self.updateStock();					
-					visualize();
-				}
+				visualize();
 			}
 		);
 
@@ -329,21 +316,19 @@ function (
 			});
 		});
 
-		console.log(Queue);
-
 		function processQueue() {
 
 			if(Queue.length == 0) {	
 
-				$rootScope.$emit('notifydialog', { text: 'Updating actual data...' });
+				$rootScope.$emit('notifydialog', { text: 'Queue finished' });
 
-				// Self.loadFromWeb()
-				// .then($Q.resolve);
+				return $timeout(function() {
+					
+					$Q.resolve();
+				}, 200);
 			}
 
 			var Chunk = Queue.shift();
-
-			console.log(Chunk);
 
 			$http.post(
 				'/wp-json/poeticsoft/woo-products-process',
@@ -362,10 +347,10 @@ function (
 			});
 		}
 
-
 		if(Queue.length > 0) {
 			
 			processQueue();
+
 		}	else {
 			
 			$rootScope.$emit('notifydialog', { text: 'Nothing to update...' });
@@ -407,6 +392,13 @@ function (
 																										) 
 																										:
 																										Self.TempData[SKU].actual_stock_quantity;
+		}		
+
+		if(Self.TempData[SKU].stock_quantity != Self.TempData[SKU].export_stock_quantity) {
+				
+			Self.TempData[SKU].status = 'changed';
+			Self.TempData[SKU].changes = Self.TempData[SKU].changes || [];
+			Self.TempData[SKU].changes.push('stock');
 		}
 	}
 
@@ -418,13 +410,6 @@ function (
 		.forEach(function(Key) {
 
 			calculateStock(Key);
-
-			if(Self.TempData[Key].stock_quantity != Self.TempData[Key].export_stock_quantity) {
-				
-				Self.TempData[Key].status = 'changed';
-				Self.TempData[Key].changes = Self.TempData[Key].changes || [];
-				Self.TempData[Key].changes.push('stock');
-			}
 		});
 
 		visualize();
@@ -449,12 +434,17 @@ function (
 			}
 
 			Self.FootPrint = Response.data.Data;
+
+			Loader.ready('FieldsFootPrint');
 		}
 	);
 
-	/* Load last products processed data */
+	/* Load last products processed data when resources ready */
 	
-	Self.loadFromWeb();
+	$rootScope.$on('loader_products_excel_ready', function() {
+
+		Self.loadFromWeb();
+	});
 
 	return Self;
 });

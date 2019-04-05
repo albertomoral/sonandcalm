@@ -448,7 +448,10 @@ APP.directive(
       
         if (widget === $scope.AgoraDataKendoSpreadsheet) { 
 					
-					$scope.loadData();
+					$rootScope.$on('loader_excelresources_ready', function() {
+
+						$scope.loadData();
+					});
 				}
 			});
 		}

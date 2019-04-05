@@ -5,7 +5,8 @@ APP.factory(
 function (
 	$http,
 	$q,
-	$rootScope
+	$rootScope,
+	Loader
 ) {
 
 	var Self = {};
@@ -25,6 +26,8 @@ function (
 			Self.OldReady = true;
 
 			$rootScope.$broadcast('stockready');
+
+			Loader.ready('ProductsStock');
 
 		} else {
 

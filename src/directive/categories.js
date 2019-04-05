@@ -5,8 +5,9 @@ APP.directive(
   function() {
 
     function controller(
-      $scope, 
-      $http, 
+      $rootScope,
+      $scope,
+      $timeout,
       Notifications, 
       Categories
     ) {
@@ -109,27 +110,24 @@ APP.directive(
         });
       }
 
-      $scope.save = function() {
-
-        Notifications.show('Saving new web categorization...');
+      $scope.save = function() {    
 
         $scope.TreeChanged = false;
 
-        $http.post(
-          '/wp-json/poeticsoft/woo-families-categories-update',
-          Categories.RelationsDS.data().toJSON()
-        )
-        .then(function(Response) {
+        $rootScope.$broadcast('opendialog', {
+          Title: 'Saving Families Categories relations...'
+        });
+        $rootScope.$emit('notifydialog', { text: 'Saving...' }); 
 
-          var Code = Response.data.Status.Code;
-          if(Code == 'OK'){            
+        Categories.saveRelations()
+        .then(function() {
 
-            Notifications.show(Response.data.Status.Message);
-          } else {
+          $rootScope.$emit('notifydialog', { text: 'Saving...' }); 
 
-            Notifications.show({ errors: Response.data.Status.Reason });
-            $scope.TreeChanged = true;
-          }
+          $timeout(function() {        					
+			
+					  $rootScope.$emit('closedialog');
+          }, 200);
         });
       }
 

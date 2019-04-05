@@ -85,7 +85,7 @@ APP.directive(
 						}
 					});
 
-					$rootScope.$emit('notifydialog', { text: 'Data Ready' });
+					$rootScope.$emit('notifydialog', { text: 'Color Size Data Ready' });
 
 					$timeout(function() {
 
@@ -114,28 +114,13 @@ APP.directive(
 				$rootScope.$broadcast('opendialog', {
 					Title: 'Saving Color & Sizes data...'
 				});
+				
+				ColorSize.save()
+				.then(function() {
 
-				$http.post(
-          '/wp-json/poeticsoft/woo-products-color-size-update',
-          ColorSize.Data
-        )
-        .then(function(Response) {
-
-          var Code = Response.data.Status.Code;
-          if(Code == 'OK'){ 
-
-						$rootScope.$emit('notifydialog', { text: Response.data.Status.Message });
-          } else {
-
-						$rootScope.$emit('notifydialog', { text: 'Error: ' + Response.data.Status.Reason }); 
-					}       
-
-					$timeout(function() {
-
-						$rootScope.$emit('closedialog');
-						$scope.allowProcessing = true;
-					});
-        });				
+					$rootScope.$emit('closedialog');
+					$scope.allowProcessing = true;
+				});
 			}
 		}
 

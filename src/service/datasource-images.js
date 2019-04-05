@@ -3,7 +3,8 @@
 APP.factory(
 	'Images', 
 function (
-	Notifications
+	Notifications,
+	Loader
 ) {
 
 	var Self = {};
@@ -79,6 +80,10 @@ function (
 					items: G.items
 				}
 			});
+		},
+		requestEnd: function(E) {			
+
+			Loader.ready('Images');
 		}
 	});
 

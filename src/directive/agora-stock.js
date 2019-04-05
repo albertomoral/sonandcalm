@@ -6,12 +6,14 @@ APP.directive(
 
 		function controller(
 			$http,
+			$q,
 			$rootScope,
 			$scope,
 			$timeout,
 			Products,
 			Notifications,
-			Stock
+			Stock,
+			Loader
 		) {
 			
 			$scope.AllowApply = false;
@@ -34,21 +36,33 @@ APP.directive(
             select: "Select EXCEL file"
         },
 				select: function(e) {
+
+					$scope.AllowApply = false;
+					$scope.DataChanged = false;
 					
 					$scope.AgoraStockKendoSpreadsheet
 					.fromFile(e.files[0].rawFile)
 					.then(function() {
-						
-						sheetLoaded(true);
+
+						$rootScope.$broadcast('opendialog', {
+							Title: 'Stock process'
+						});
+
+						sheetLoaded(true)
+						.then(function() {
+
+							$scope.AllowApply = true;
+							$scope.DataChanged = true;
+	
+							$rootScope.$emit('closedialog');
+						});
 					});
 				}
 			}
 
 			function sheetLoaded() {
 
-				$rootScope.$broadcast('opendialog', {
-					Title: 'Stock process'
-				});
+				var $Q = $q.defer();
 
 				// There is a sheet "Inventario"
 
@@ -148,20 +162,16 @@ APP.directive(
 						};
 					});
 
-					$rootScope.$emit('notifydialog', { text: 'Data Ready' });
+					$rootScope.$emit('notifydialog', { text: 'Stock Data Ready' });
 
 					$timeout(function() {
 
-						$scope.AllowApply = true;
-						$scope.DataChanged = true;
-						
-						Stock.NewReady = true;
-						$rootScope.$broadcast('stockready');
-
-						$rootScope.$emit('closedialog');
+						$Q.resolve();
 
 					}, 200);
 				}, 200);
+
+				return $Q.promise;
 			}
 		
 			$scope.AgoraStockSpreadsheetConfig = {
@@ -222,15 +232,9 @@ APP.directive(
 
 			/* Load last excel saved */
 
-			$scope.loadData = function() {
-			
-				$scope.AllowApply = false;
+			function loadData() {
 
-				$rootScope.$broadcast('opendialog', {
-					Title: 'Loading stock data'
-				});
-			
-				$scope.allowProcessing = false;
+				var $Q = $q.defer();
 
 				$http.get('/wp-json/poeticsoft/woo-agora-excel-stock-read')
 				.then(function(Response) {
@@ -264,17 +268,23 @@ APP.directive(
 
 						$timeout(function() {
 
-							$rootScope.$emit('closedialog');
+							sheetLoaded()
+							.then(function() {
 
-							sheetLoaded();
+								$Q.resolve();
+							});
 							
 						}, 200);
 
 					} else {
 
 						Notifications.show({ errors: Response.data.Status.Reason });
+
+						$Q.resolve();
 					}
 				});
+
+				return $Q.promise
 			}
 
 			$scope.download = function() {
@@ -282,13 +292,38 @@ APP.directive(
 				$scope.AgoraStockKendoSpreadsheet.saveAsExcel();
 			}
 
+			// Revert
+
+			$scope.revert = function() {				
+			
+				$scope.AllowApply = false;			
+				$scope.allowProcessing = false;
+
+				$rootScope.$broadcast('opendialog', {
+					Title: 'Loading stock data'
+				});
+
+				loadData()
+				.then(function() {
+
+					$rootScope.$broadcast('closedialog');									
+			
+					$scope.AllowApply = true;			
+					$scope.allowProcessing = true;
+				});
+			}
+
 			// Load Agora Stock data
 			
 			$scope.$on("kendoWidgetCreated", function(event, widget){
       
         if (widget === $scope.AgoraStockKendoSpreadsheet) { 
-					
-					$scope.loadData();
+
+					loadData()
+					.then(function() {
+
+						Loader.ready('ExcelStock');
+					});
 				}
 			});
 		}
@@ -312,7 +347,7 @@ APP.directive(
 							Apply
 						</button>
 						<button class="k-button"
-										ng-click="loadData()"
+										ng-click="revertData()"
 										ng-disabled="!DataChanged">
 							Revert
 						</button>

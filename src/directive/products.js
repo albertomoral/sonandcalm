@@ -144,6 +144,8 @@ function() {
       Stock.saveState()
       .then(function() {
 
+        Categories.saveRelations();
+
         Products.saveToWeb()
         .then(function() {
 
@@ -188,11 +190,11 @@ function() {
 
             Field = Field.map(function(ID) {
 
-              var Categorie = Categories.DS.get(ID);
+              var Categorie = Categories.RemoteDS.get(ID);
               var Text = Categorie ? Categorie.get('name') : 'Error';
-              return Text;
+              return '<div>(' + ID + ') ' + Text + '</div>';
             })
-            .join(' - ');
+            .join('');
           }
 
           if(
@@ -200,7 +202,15 @@ function() {
             Key == 'variations'
           ) {
 
-            Field = JSON.stringify(Field, null, 4);
+            Field = Object.keys(Field)
+            .map(function(Key) {
+
+              var Name = Key;
+              var Value = Field[Key].split('|').join(' - ');
+
+              return '<div><span>' + Name + '</span><span>' + Value + '</span></div>';
+            })
+            .join('');
           }
 
           TooltipContent += `<div class="Field">

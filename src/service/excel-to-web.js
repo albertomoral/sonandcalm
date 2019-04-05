@@ -38,7 +38,7 @@ function (
 			parent_sku: Product.Parent,
 			type: Product.Type,
 			name: Product.Producto,
-			category_ids: Product.Categories || [],
+			category_ids: Product.Categories,
 			regular_price: Product['Precio General'] || 0,
 			/* Calculated from ColorSize */
 			attributes: {
@@ -47,8 +47,7 @@ function (
 			},
 			/* Calculated from Images */
 			image_id: Product.ImageId,
-			gallery_image_ids: Product.GalleryImageIds || [],
-			variation_gallery_images: Product.VariationGalleryImages || []
+			gallery_image_ids: Product.GalleryImageIds || []
 		};
 	}
 
@@ -57,6 +56,7 @@ function (
 	function addSimpleProduct(Group) {
 
 		var Product = Group[0];
+
 		var SKU = Product['Código Barras'];	
 		var ProductImages = Images.Group[SKU] && 
 												Images.Group[SKU].items &&
@@ -68,6 +68,7 @@ function (
 		Product.Type = 'simple';
 		Product.Producto = formatName(Product.Producto);
 		Product.Categories = Categories.FamilyCategories[Product.Familia] || [];
+		(Product.Categories.length == 0) && (Product.Categories = [Categories.UncategorizedId]);
 		Product.Attributes = {
 			Color: ColorSize.Data[SKU] && ColorSize.Data[SKU].color || '',
 			Size: ColorSize.Data[SKU] && ColorSize.Data[SKU].size || ''
@@ -115,10 +116,17 @@ function (
 
 		/* Categories as unique from variations (because family in variations can change?) */
 
-		Product.Categories = _.union(Group.map(function(P) {
+		Product.Categories = 	Group.reduce(function(Accumulate, Variation) {
 
-			return Categories.FamilyCategories[P.Familia] || [];
-		}));
+			var VariationCategories = Categories.FamilyCategories[Variation.Familia] || [];
+
+			Accumulate = _.union(Accumulate, VariationCategories);
+
+			return Accumulate;
+
+		}, []);
+
+		(Product.Categories.length == 0) && (Product.Categories = [Categories.UncategorizedId]);
 
 		/* Attributes as uniq sum of color & Size of variations */
 
@@ -126,11 +134,6 @@ function (
 			Color: _.uniq(Group.map(function(P) { return P.Color; })).join('|'),
 			Size: _.uniq(Group.map(function(P) { return P.Size; })).join('|')
 		}
-
-		/*
-			Image as first image from first variation 
-			TODO remove from variations?
-		*/
 
 		var GroupImages = Group.reduce(function(Accumulate, Variation) {
 
@@ -156,7 +159,14 @@ function (
 
 		if(GroupImages.length > 0) {
 
-			Product.ImageId = GroupImages[0];
+			Product.ImageId = GroupImages.shift();
+		}
+
+		Product.GalleryImageIds = [];
+
+		if(GroupImages.length > 0) {
+
+			Product.GalleryImageIds = Product.GalleryImageIds.concat(GroupImages);
 		}
 
 		/* Add variable product */
@@ -165,17 +175,18 @@ function (
 
 		/* Variations */
 
-		Group.forEach(addVariationProduct);
+		Group.forEach(addVariationProduct, Product);
 	}
 
 	/* Add variation product */
 
-	function addVariationProduct(Product) {
+	function addVariationProduct(Product, Parent) {
 
 		var SKU = Product['Código Barras'];
 
 		Product.Type = 'variation';		
 		Product.Producto = formatName(Product.Producto);
+		Product.Categories = Parent.Categories;
 		Product.Attributes = {
 			Color: Product.Color || '',
 			Size: Product.Size || ''
@@ -184,8 +195,7 @@ function (
 		/* Image as first image from group, rest are gallery images */
 
 		var VariationImages = Images.Group[SKU];
-		var VariationImagesIds;
-			
+		var VariationImagesIds;			
 		if(VariationImages) {
 
 			VariationImagesIds = VariationImages
@@ -197,10 +207,16 @@ function (
 			);
 		}
 
+		/* Pick only first fot variation rest for product gallery */
+
 		if(VariationImagesIds && VariationImagesIds.length > 0) {
 
 			Product.ImageId = VariationImagesIds.shift();
-			Product.VariationGalleryImages = VariationImagesIds;
+
+			if(VariationImagesIds.length > 0) {
+
+				Parent.GalleryImageIds = Parent.GalleryImageIds.concat(VariationImagesIds);
+			}
 		}
 
 		/* Add variation product */

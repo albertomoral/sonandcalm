@@ -24,10 +24,17 @@ function() {
 		resize();		
 
 		$timeout(function() {
+
+			/* Load process */
 						
 			$rootScope.$broadcast('opendialog', {
 				Title: 'Loading data...'
 			});
+		});
+
+		$rootScope.$on('loader_products_excel_ready', function() {
+
+			$rootScope.$broadcast('closedialog');
 		});
 	}
 

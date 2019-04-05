@@ -10,6 +10,7 @@ APP.directive(
       Notifications, 
       Products,
       Images, 
+      Loader, 
       $window,
       $element
     ) {
@@ -169,6 +170,8 @@ APP.directive(
             if(Code == 'OK'){            
     
               $scope.ImageKendoUpload.options.validation.maxFileSize = Response.data.Data.MaxSize;
+
+              Loader.ready('MaxUploadSize');
     
             } else {
     

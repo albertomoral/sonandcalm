@@ -399,7 +399,7 @@
   text-align: left;
   background-color: #fff;
   color: #888;
-  padding: 10px; }
+  padding: 5px 10px; }
   .DataToolTip .Field {
     border: solid #ccc;
     border-width: 0 0 1px 0;
@@ -414,6 +414,18 @@
       width: 40%; }
     .DataToolTip .Field .Value {
       width: 55%; }
+      .DataToolTip .Field .Value div {
+        padding: 0 0 5px 0; }
+        .DataToolTip .Field .Value div span {
+          display: inline-block;
+          width: 75%;
+          vertical-align: top; }
+          .DataToolTip .Field .Value div span:first-child {
+            width: 20%; }
+      .DataToolTip .Field .Value div + div {
+        border: solid #ccc;
+        border-width: 1px 0 0 0;
+        padding: 5px 0; }
 
 /* _categories.scss */
 .poeticsoft-woo-agora .poeticsoft-woo-agora-categories {

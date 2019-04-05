@@ -3,7 +3,10 @@
 APP.factory(
 	'Categories', 
 function (
-	Notifications
+	$http,
+	$q,
+	Notifications,
+	Loader
 ) {
 
 	var Self = {};
@@ -35,7 +38,8 @@ function (
 
 		return Nodes;
 	}
-	
+
+	Self.UncategorizedId = null;	
 	Self.RemoteDS = new kendo.data.DataSource ({
 		transport: {
 			read: {
@@ -50,7 +54,8 @@ function (
 				fields: {
 					'id': { type: 'number', editable: false },
 					'parentId': { type: 'string', editable: false },
-					'name': { type: 'string', editable: false }
+					'name': { type: 'string', editable: false },
+					'slug': { type: 'string', editable: false }
 				}
 			},
 			data: 'Data',
@@ -64,7 +69,14 @@ function (
 		requestEnd: function(E) {
 
 			TreeData = E.response.Data;
+			var Uncategorized = TreeData.find(function(C) {
+
+				return C.slug == 'uncategorized';
+			});
+			Uncategorized && (Self.UncategorizedId = Uncategorized.id);
 			Self.DS.data(constructTree()); // Feed Self.DS
+
+			Loader.ready('ProductsCategories');
 		}
 	});
 	Self.RemoteDS.read();
@@ -98,6 +110,8 @@ function (
 		requestEnd: function(E) {			
 
 			Self.updateFamiliesCategories();
+
+			Loader.ready('FamiliesCategories');
 		}
 	});
 	Self.RelationsDS.read();
@@ -145,6 +159,28 @@ function (
 
 			Self.FamilyCategories[Family.family] = Family.categories;
 		});
+	}
+
+	Self.saveRelations = function() {		
+
+		var $Q = $q.defer();
+		
+		$http.post(
+			'/wp-json/poeticsoft/woo-families-categories-update',
+			Self.RelationsDS.data().toJSON()
+		)
+		.then(function(Response) {
+
+			var Code = Response.data.Status.Code;
+			if(Code == 'KO'){ 
+
+				Notifications.show({ errors: Response.data.Status.Reason });
+			}
+
+			$Q.resolve();
+		});
+
+		return $Q.promise;
 	}
 
 	return Self;

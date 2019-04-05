@@ -3,7 +3,8 @@
 APP.factory(
 	'ParentSku', 
 function (
-	$http
+	$http,
+	Loader
 ) {
 
 	var Self = {};
@@ -17,6 +18,8 @@ function (
 		if(Code == 'OK'){ 
 
 			Self.Data = Response.data.Data;
+
+			Loader.ready('ParentSKU');
 
 		} else {
 
