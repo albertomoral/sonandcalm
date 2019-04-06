@@ -193,6 +193,19 @@
 							}
 						}
 					}
+
+					tr.Changed {
+
+						td.Stock,
+						td.Web,
+						td.Last,
+						td.Actual,
+						td.Export {
+							
+							background-color: #e6795966;
+							color: #fff;
+						}
+					}
 				}
 
 				.k-status {

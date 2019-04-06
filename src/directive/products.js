@@ -104,17 +104,33 @@ function() {
       toolbar: [
         {
           name: 'reload',
-          text: 'Revert to last saved',
+          text: 'Revert to web last saved',
           imageClass: 'k-icon k-i-undo Revert',
           click: revertFromWeb
         },
         {
           name: 'savetoweb',
-          text: 'Update web products',
+          text: 'Update web products & excel stock',
           imageClass: 'k-icon k-i-save Save',
           click: saveToWeb
         }
-      ]
+      ],
+      dataBound: function(E){
+        
+        var Items = E.sender.items();
+
+        Items.each(function (Index) {
+
+          var dataItem = $scope.ProductKendoTreeList.dataItem(this);
+          if (
+            dataItem.status == 'changed' /* &&
+            dataItem.changes.indexOf('stock') != -1 */
+          ) {
+
+            this.className += ' Changed Stock';
+          }
+        });
+      }
     }; 
 
     /* Tool bar */
@@ -232,8 +248,8 @@ function() {
 
         $RevertButton = $GridElement.find('.k-grid-toolbar button[data-command="reload"]');
         $SaveButton = $GridElement.find('.k-grid-toolbar button[data-command="savetoweb"]');
-
-        $SaveButton.prop('disabled', true);
+        
+        // $SaveButton.prop('disabled', true); check id stock changed
 
         var DataTooltip = $GridElement
         .find('.k-grid-content')
@@ -258,6 +274,7 @@ function() {
           function() {
 
             DataTooltip.show(jQuery(this));
+            return false;
           }
         );
 

@@ -158,7 +158,8 @@ APP.directive(
 						if(!StockCell) return;
 
 						Stock.NewData[SKU] = {
-							Value: $.trim(StockCell.value)
+							Value: $.trim(StockCell.value),
+							Index: Row.index + 1
 						};
 					});
 
@@ -312,6 +313,34 @@ APP.directive(
 					$scope.allowProcessing = true;
 				});
 			}
+
+			// Update new stock
+
+			$scope.$on('updateexcelstock', function(Event, Data) {
+
+				Data.forEach(function(Product) {
+
+					var StockProduct = Stock.NewData[Product.sku];
+					if(StockProduct) {
+
+						var RowIndex = Stock.NewData[Product.sku].Index;
+						var StockCell = InventarioSheet.range(Products.FootPrint.Stock.StockCellIndex + RowIndex);
+						var ActualValue = StockCell.value();
+						var ExportValue = Product.export_stock_quantity;
+
+						if(ActualValue != ExportValue) {
+						
+							StockCell.value(ExportValue);
+							StockCell.background('#e67959');
+							StockCell.color('#ffffff');
+						} else {
+						
+							StockCell.background('#71e659');
+							StockCell.color('#ffffff');							
+						}
+					}
+				});
+			});
 
 			// Load Agora Stock data
 			

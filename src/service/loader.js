@@ -7,7 +7,7 @@ function (
 ) {
 
 	var Self = {};
-	var Debug = true;
+	var Debug = false;
 	var Loaded = {
 		'ProductsCategories': false,
 		'FamiliesCategories': false,
@@ -27,6 +27,17 @@ function (
 		'ExcelStock': false
 	}
 
+	function done(Key) {
+
+		if(!Done[Key]) {
+
+			Done[Key] = true;
+
+			if(Debug) console.log('* loader_' + Key.toLowerCase() + '_ready');
+			$rootScope.$broadcast('loader_' + Key.toLowerCase() + '_ready');
+		}
+	}
+
 	function check() {
 
 		/* ------------------------------------------------------------
@@ -43,37 +54,16 @@ function (
 			Loaded['MaxUploadSize'] &&
 			Loaded['Images'] &&
 			Loaded['ProductsStock']
-		) {
-
-			if(!Done['ProductsResources']) {
-
-				Done['ProductsResources'] = true;
-
-				if(Debug) console.log('* loader_productsresources_ready');
-
-				$rootScope.$broadcast('loader_productsresources_ready');
-				// Load products from web
-			}
-		}
+		) { done('ProductsResources'); }
 
 		// ------------------------------
 		// Agora Excel Resources
 
 		if(
 			Loaded['FieldsFootPrint'] &&
-			Loaded['ParentSKU']
-		) {
-
-			if(!Done['ExcelResources']) {
-
-				Done['ExcelResources'] = true;
-
-				if(Debug) console.log('* loader_excelresources_ready');
-
-				$rootScope.$broadcast('loader_excelresources_ready');
-				// Load agora Excel
-			}
-		}
+			Loaded['ParentSKU'] &&
+			Loaded['ExcelStock']
+		) { done('ExcelResources'); }
 
 		/* ------------------------------------------------------------
 			Dones */
@@ -84,25 +74,13 @@ function (
 		if(
 			Done['ProductsResources'] && 
 			Done['ExcelResources']
-		) {
-
-			if(!Done['ProductsExcel']) {
-
-				Done['ProductsExcel'] = true;
-
-				if(Debug) console.log('> loader_products_excel_ready');
-	
-				$rootScope.$broadcast('loader_products_excel_ready');
-			}
-		}
+		) { done('ProductsExcelResources'); }
 	}
 
 	Self.ready = function(Key) {
 
-		if(Debug) console.log('Loaded' + Key);
-
+		if(Debug) console.log('Loaded ' + Key);
 		$rootScope.$emit('notifydialog', { text: 'Loaded ' + Key });
-
 		Loaded[Key] = true;
 		check();
 	}	

@@ -110,11 +110,9 @@ function (
 		requestEnd: function(E) {			
 
 			Self.updateFamiliesCategories();
-
 			Loader.ready('FamiliesCategories');
 		}
 	});
-	Self.RelationsDS.read();
 
 	Self.updateFamilies = function(FamiliesList) {
 

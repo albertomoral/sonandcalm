@@ -143,7 +143,7 @@ APP.directive(
 
       $scope.FamiliesListViewConfig = {
         dataSource: Categories.RelationsDS,
-        selectable: 'multiple',        
+        selectable: 'multiple',
         template: `<div class="ListViewItem"
           data-family="#= family #">
           #= family # [#= categories.length #]

@@ -388,6 +388,13 @@
           color: #c00; }
           .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content td.Status .k-icon.deleted:before {
             content: "\e11c"; }
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content tr.Changed td.Stock,
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content tr.Changed td.Web,
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content tr.Changed td.Last,
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content tr.Changed td.Actual,
+      .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-grid-content tr.Changed td.Export {
+        background-color: #e6795966;
+        color: #fff; }
     .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView .k-treelist .k-status {
       display: none; }
   .poeticsoft-woo-agora .poeticsoft-woo-agora-products .WebProductsView td.Editable.Variable,

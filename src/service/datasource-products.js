@@ -284,7 +284,11 @@ function (
 
 		/* Same as Self.TempData but may be in a future grid will be editable */
 
-		var ProductsData = Self.DS.data().toJSON();
+		var ProductsData = Self.DS.data().toJSON();		
+        
+		/* Stock excel update */
+
+		$rootScope.$broadcast('updateexcelstock', ProductsData);
 		
 		/* Generate queue */
 
@@ -412,8 +416,6 @@ function (
 			calculateStock(Key);
 		});
 
-		visualize();
-
 		$Q.resolve();
 
 		return $Q.promise;
@@ -441,7 +443,7 @@ function (
 
 	/* Load last products processed data when resources ready */
 	
-	$rootScope.$on('loader_products_excel_ready', function() {
+	$rootScope.$on('loader_productsexcelresources_ready', function() {
 
 		Self.loadFromWeb();
 	});
