@@ -10,6 +10,7 @@ function() {
     $rootScope,
     $scope, 
     $window, 
+    $timeout,
     Products, 
     Categories,
     Images,
@@ -20,19 +21,31 @@ function() {
       PRODUCT TREE LIST
     */
 
-    $scope.haveImages = function(SKU) {
+    $scope.uploadedImages = function(SKU) {
 
       return Images.Group[SKU] && Images.Group[SKU].count || 0;
     }
 
-    function checkValue(Var) {
+    $scope.assignedImages = function(Item) {
 
-      if(typeof Var == 'undefined' || Var === null) {
+      return (Item.image_id ? 1 : 0) + 
+              ' / ' + 
+              ((Item.gallery_image_ids && Item.gallery_image_ids.length) || 0);
+    }
 
-        return '0';
-      } 
+    $scope.statusChanged = function(Item) {
 
-      return Var;
+      if(Item.status == 'changed' && Item.changes.indexOf('stock') != -1) {
+
+        return 'stockchanged';
+      }
+      
+      if(Item.changes && Item.changes.indexOf('exportstock') != -1) {
+
+        return 'exportstock';
+      }
+
+      return '';
     }
 
     /* Columns config */    
@@ -56,24 +69,41 @@ function() {
           {
             field: 'stock_quantity',
             title: 'Web',
+            template: '<span title="Actual stock in web" ' +
+                            'class="#= type # {{ statusChanged(dataItem) }}">' +
+                          '#= stock_quantity != null ? stock_quantity : "" #' +
+                      '</span>',
             width: 60,
             attributes: { class: 'Web' }
           },
           {
             field: 'last_stock_quantity',
             title: 'Last',
+            template: '<span title="Last value loaded from excel stock" ' +
+                            'class="#= type # {{ statusChanged(dataItem) }}">' +
+                        '#= last_stock_quantity != null ? last_stock_quantity : "" #' +
+                      '</span>',
             width: 60,
             attributes: { class: 'Last' }
           },
           {
-            field: 'actual_stock_quantity',
-            title: 'Actual',
+            field: 'import_stock_quantity',
+            title: 'Import',
+            template: '<span title="Actual value loaded from stock excel" ' +
+                            'class="#= type # {{ statusChanged(dataItem) }}">' +
+                        '#= import_stock_quantity != null ? import_stock_quantity : "" #' +
+                      '</span>',
             width: 60,
-            attributes: { class: 'Actual' }
+            attributes: { class: 'Import' }
           },
           {
             field: 'export_stock_quantity',
             title: 'Export',
+            template: '<span title="Value to export in stock excel" ' +
+                            'class="#= export_stock_quantity < 0 ? \"Negative\" : \"\" # ' +
+                            '#= type # {{ statusChanged(dataItem) }}">' +
+                        '#= export_stock_quantity != null ? export_stock_quantity : "" #' + 
+                      '</a>',
             width: 60,
             attributes: { class: 'Export' }
           }
@@ -82,9 +112,20 @@ function() {
       }, 
       {
         title: 'Image/s',
-        width: 70,
-        template: '{{ haveImages(dataItem.sku) }}',
-        attributes: { class: 'Image' }
+        columns: [
+          {
+            title: 'Asigned',
+            width: 70,
+            template: '{{ assignedImages(dataItem) }}',
+            attributes: { class: 'Image' }
+          },
+          {
+            title: 'Upload',
+            width: 70,
+            template: '{{ uploadedImages(dataItem.sku) }}',
+            attributes: { class: 'Image' }
+          }
+        ]
       },
       {
         field: 'status',
@@ -114,23 +155,7 @@ function() {
           imageClass: 'k-icon k-i-save Save',
           click: saveToWeb
         }
-      ],
-      dataBound: function(E){
-        
-        var Items = E.sender.items();
-
-        Items.each(function (Index) {
-
-          var dataItem = $scope.ProductKendoTreeList.dataItem(this);
-          if (
-            dataItem.status == 'changed' /* &&
-            dataItem.changes.indexOf('stock') != -1 */
-          ) {
-
-            this.className += ' Changed Stock';
-          }
-        });
-      }
+      ]
     }; 
 
     /* Tool bar */
@@ -145,35 +170,43 @@ function() {
       Products.loadFromWeb()
       .then(function() {
 
-        $SaveButton.prop('disabled', true);
         $rootScope.$emit('closedialog');
       });
     } 
 
-    function saveToWeb() {     
+    function saveToWeb() { 
+      
+      if(Products.CanUpdateWeb) {
 
-      $rootScope.$broadcast('opendialog', {
-        Title: 'Saving to WordPress..'
-      });
-      $rootScope.$emit('notifydialog', { text: 'Saving...' }); 
+        $rootScope.$broadcast('opendialog', {
+          Title: 'Saving to WordPress..'
+        });
+        $rootScope.$emit('notifydialog', { text: 'Saving...' }); 
 
-      Stock.saveState()
-      .then(function() {
-
-        Categories.saveRelations();
-
-        Products.saveToWeb()
+        Stock.saveState()
         .then(function() {
 
-          $rootScope.$emit('closedialog');
+          Categories.saveRelations();
+
+          Products.saveToWeb()
+          .then(function() {
+
+            $rootScope.$emit('closedialog');
+          });
         });
-      });
-    }    
+      } else {
 
-		$scope.$on('productschanged', function() {        
+        $rootScope.$broadcast('opendialog', {
+          Title: 'Stock negative!'
+        });
+        $rootScope.$emit('notifydialog', { text: 'Cannot update web with negative stock' }); 
 
-      $SaveButton.prop('disabled', false);
-    });
+        $timeout(function() {
+
+          $rootScope.$emit('closedialog');
+        }, 1000);
+      }
+    }
 
     /* Resize grid */
 
@@ -194,8 +227,10 @@ function() {
       }
 
       var RowData = $scope.ProductKendoTreeList.dataItem(Row.eq(0)).toJSON();
+      var Fields = Object.keys(Products.DSConfig.schema.model.fields);
       var TooltipContent = '<div class="DataToolTip">';
-      Object.keys(RowData)
+
+      Fields
       .forEach(function(Key) {
 
         var Field = RowData[Key];
@@ -234,7 +269,8 @@ function() {
             <span class="Value">${ Field }</span>
           </div>`
         }
-      })
+      });
+      
       TooltipContent += '</div>';
 
       return TooltipContent;
@@ -247,9 +283,6 @@ function() {
         var $GridElement = jQuery($scope.ProductKendoTreeList.element);
 
         $RevertButton = $GridElement.find('.k-grid-toolbar button[data-command="reload"]');
-        $SaveButton = $GridElement.find('.k-grid-toolbar button[data-command="savetoweb"]');
-        
-        // $SaveButton.prop('disabled', true); check id stock changed
 
         var DataTooltip = $GridElement
         .find('.k-grid-content')

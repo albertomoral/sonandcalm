@@ -107,6 +107,71 @@ function (
 		calculateStock(SKU);
 	}	
 
+	function calculateStock(SKU) {							
+
+		if(Self.TempData[SKU].type == 'variable') {
+
+			Self.TempData[SKU].stock_quantity = '';
+			Self.TempData[SKU].last_stock_quantity = '';
+			Self.TempData[SKU].import_stock_quantity = '';
+			Self.TempData[SKU].export_stock_quantity = '';
+			
+		} else {
+
+			var StockQuantity = Self.WebData[SKU] ? Self.WebData[SKU].stock_quantity : null;
+
+			Self.TempData[SKU].stock_quantity = StockQuantity;
+			Self.TempData[SKU].last_stock_quantity = (Stock.OldData[SKU] && Stock.OldData[SKU].Value) || '-';
+			Self.TempData[SKU].import_stock_quantity = (Stock.NewData[SKU] && Stock.NewData[SKU].Value) || '-';
+			Self.TempData[SKU].export_stock_quantity = Self.TempData[SKU].stock_quantity ?
+																										Self.TempData[SKU].import_stock_quantity - 
+																										(
+																												Self.TempData[SKU].last_stock_quantity - 
+																												Self.TempData[SKU].stock_quantity
+																										) 
+																										:
+																										Self.TempData[SKU].import_stock_quantity;	
+
+			if(
+				Self.TempData[SKU].stock_quantity != Self.TempData[SKU].export_stock_quantity
+			) {
+					
+				Self.TempData[SKU].status = 'changed';
+				Self.TempData[SKU].changes = Self.TempData[SKU].changes || [];
+				Self.TempData[SKU].changes.push('stock');
+			}
+
+			if(
+				Self.TempData[SKU].import_stock_quantity != Self.TempData[SKU].export_stock_quantity
+			) {
+					
+				Self.TempData[SKU].changes = Self.TempData[SKU].changes || [];
+				Self.TempData[SKU].changes.push('exportstock');
+			}
+
+			if(Self.TempData[SKU].export_stock_quantity < 0) {
+
+				Self.CanUpdateWeb = false;
+			}			
+		}	
+	}
+
+	/* -------------------------------------------------------------------------
+		Update stock in actual products
+	*/
+
+	Self.CanUpdateWeb = true; // Cannot update web if export stock is negative;
+
+	Self.updateStock = function() {
+
+		Self.CanUpdateWeb = true;
+
+		Object.keys(Self.TempData)
+		.forEach(calculateStock);		
+
+		visualize();
+	}
+
 	/* -------------------------------------------------------------------------
 		 Update process buffer with data from agora excel 
 	*/
@@ -137,8 +202,7 @@ function (
 			/* Update if changed */
 
 			else { calculateChanges(SKU); }
-
-			/* Save stock as in web */
+			
 		});
 
 		/* visualize result */
@@ -176,7 +240,7 @@ function (
 		Data structure for kendo grid
 	*/
 
-	Self.DS = new kendo.data.TreeListDataSource ({
+	Self.DSConfig = {
 		transport: {
 			read: function(Op) {
 
@@ -195,6 +259,8 @@ function (
 					'name': { type: 'string', editable: false },
 					'category_ids': [],	
 					'sale_price': { type: 'number', editable: false },
+					/* Mark */	
+					'status': { type: 'string', editable: false }, // 'updated', 'deleted', 'new', 'changed'
 					/* Calculated from ColorSize */
 					'attributes': {
 						'color': '',
@@ -205,8 +271,11 @@ function (
 					'gallery_image_ids': [],
 					/* Calculated from Stock */	
 					'stock_quantity': { type: 'number', editable: false },
-					/* Mark */	
-					'status': { type: 'string', editable: false } // 'updated', 'deleted', 'new', 'changed'
+					'last_stock_quantity': { type: 'number', editable: false }, 
+					'import_stock_quantity': { type: 'number', editable: false }, 
+					'export_stock_quantity': { type: 'number', editable: false },
+					/* Changes list */
+					'changes': []
 				},
 				expanded: true
 			}
@@ -215,7 +284,9 @@ function (
 			field: 'sku', 
 			dir: 'asc' 
 		}
-	});
+	};
+
+	Self.DS = new kendo.data.TreeListDataSource (Self.DSConfig);
 
 	/* -------------------------------------------------------------------------
 		Load Web Products Data
@@ -254,8 +325,6 @@ function (
 				Self.TempData = JSON.parse(JSON.stringify(Self.WebData));
 
 				Self.updateStock();
-
-				visualize();
 			}
 		);
 
@@ -324,11 +393,20 @@ function (
 
 			if(Queue.length == 0) {	
 
-				$rootScope.$emit('notifydialog', { text: 'Queue finished' });
+				$rootScope.$emit('notifydialog', { text: 'Queue finished, updating state...' });
 
 				return $timeout(function() {
+
+					Self.loadFromWeb()
+					.then(function() {						
+
+						$rootScope.$emit('notifydialog', { text: 'State updated refreshing data...' });
+
+						$timeout(function() {
 					
-					$Q.resolve();
+							$Q.resolve();
+						}, 200);
+					});
 				}, 200);
 			}
 
@@ -364,59 +442,6 @@ function (
 				$Q.resolve();
 			}, 200);
 		}
-
-		return $Q.promise;
-	}
-
-	/* -------------------------------------------------------------------------
-		Update stock in actual products
-	*/	
-
-	function calculateStock(SKU) {				
-
-		if(Self.TempData[SKU].type == 'variable') {
-
-			Self.TempData[SKU].stock_quantity = '';
-			Self.TempData[SKU].last_stock_quantity = '';
-			Self.TempData[SKU].actual_stock_quantity = '';
-			Self.TempData[SKU].export_stock_quantity = '';
-			
-		} else {
-
-			var StockQuantity = Self.WebData[SKU] ? Self.WebData[SKU].stock_quantity : null;
-
-			Self.TempData[SKU].stock_quantity = StockQuantity;
-			Self.TempData[SKU].last_stock_quantity = (Stock.OldData[SKU] && Stock.OldData[SKU].Value) || '-';
-			Self.TempData[SKU].actual_stock_quantity = (Stock.NewData[SKU] && Stock.NewData[SKU].Value) || '-';
-			Self.TempData[SKU].export_stock_quantity = Self.TempData[SKU].stock_quantity ?
-																										Self.TempData[SKU].actual_stock_quantity - 
-																										(
-																												Self.TempData[SKU].last_stock_quantity - 
-																												Self.TempData[SKU].stock_quantity
-																										) 
-																										:
-																										Self.TempData[SKU].actual_stock_quantity;
-		}		
-
-		if(Self.TempData[SKU].stock_quantity != Self.TempData[SKU].export_stock_quantity) {
-				
-			Self.TempData[SKU].status = 'changed';
-			Self.TempData[SKU].changes = Self.TempData[SKU].changes || [];
-			Self.TempData[SKU].changes.push('stock');
-		}
-	}
-
-	Self.updateStock = function() {
-
-		var $Q = $q.defer();
-				
-		Object.keys(Self.TempData)
-		.forEach(function(Key) {
-
-			calculateStock(Key);
-		});
-
-		$Q.resolve();
 
 		return $Q.promise;
 	}

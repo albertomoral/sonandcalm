@@ -52,8 +52,8 @@ function() {
 				<div class="Web">
 					<div kendo-tab-strip>
 						<ul>
-							<li class="k-state-active">Products</li>
-							<li>Categories</li>
+							<li>Products</li>
+							<li class="k-state-active">Categories</li>
 							<li>Images</li>
 						</ul>
 						<poeticsoft-woo-agora-products></poeticsoft-woo-agora-products>                        
@@ -65,8 +65,8 @@ function() {
 					<div kendo-tab-strip>
 						<ul>
 							<!-- li>Color Size</li -->
-							<li class="k-state-active">Products</li>
-							<li>Stock</li>
+							<li>Products</li>
+							<li class="k-state-active">Stock</li>
 						</ul>                                     
 						<!-- poeticsoft-woo-agora-color-size></poeticsoft-woo-agora-color-size --> 
 						<poeticsoft-woo-agora-data></poeticsoft-woo-agora-data>                      

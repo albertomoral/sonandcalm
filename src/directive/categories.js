@@ -110,7 +110,7 @@ APP.directive(
         });
       }
 
-      $scope.save = function() {    
+      $scope.apply = function() {    
 
         $scope.TreeChanged = false;
 
@@ -122,11 +122,18 @@ APP.directive(
         Categories.saveRelations()
         .then(function() {
 
-          $rootScope.$emit('notifydialog', { text: 'Saving...' }); 
+          $rootScope.$emit('notifydialog', { text: 'Updatin products...' }); 
 
-          $timeout(function() {        					
-			
-					  $rootScope.$emit('closedialog');
+          $timeout(function() {
+
+            Products.updateCategories()
+            .then(function() {
+
+              $timeout(function() {        					
+          
+                $rootScope.$emit('closedialog');
+              }, 200);
+            });
           }, 200);
         });
       }
@@ -173,10 +180,10 @@ APP.directive(
                   class="k-button">
             Revert to saved
           </button>
-          <button data-ng-click="save()"
+          <button data-ng-click="apply()"
                   ng-disabled="!TreeChanged"
                   class="k-button">
-            Save to web
+            Apply
           </button>
         </div>
         <div class="Views">
@@ -191,7 +198,7 @@ APP.directive(
             <button ng-click="updateRelations()"
                     ng-disabled="!SelectedCategorieId"
                     class="k-button">
-              Update Category
+              Update Relation
             </button>
           </div>
           <div class="Families">

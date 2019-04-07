@@ -126,7 +126,11 @@ APP.directive(
 				.forEach(function(ColumnIndex) {
 
 					var Range = ColumnIndex + '1:' + ColumnIndex + RowCount;
-					InventarioSheet.range(Range).enable(false)
+					InventarioSheet
+					.range(Range)
+					.enable(false)
+					.background('transparent')
+					.color('black');
 				});
 
 				// Extract data				
@@ -199,35 +203,33 @@ APP.directive(
 
 				$timeout(function() {
 
-					Products.updateStock()
-					.then(function() {
+					var Data = {
+						InventarioSheetData: InventarioSheet.toJSON()
+					};		
 
-						var Data = {
-							InventarioSheetData: InventarioSheet.toJSON()
-						};		
+					$rootScope.$emit('notifydialog', { text: 'Saving stock data' });			
 
-						$rootScope.$emit('notifydialog', { text: 'Saving stock data' });			
+					$http.post(
+						'/wp-json/poeticsoft/woo-agora-excel-stock-update',
+						Data
+					)
+					.then(function(Response) {
 
-						$http.post(
-							'/wp-json/poeticsoft/woo-agora-excel-stock-update',
-							Data
-						)
-						.then(function(Response) {
+						var Code = Response.data.Status.Code;
+						if(Code == 'OK'){
+							
+							$scope.AllowApply = true;
+							$scope.DataChanged = false;
 
-							var Code = Response.data.Status.Code;
-							if(Code == 'OK'){
-			
-								$scope.AllowApply = true;
-								$scope.DataChanged = false;
+						} else {
 
-							} else {
+							Notifications.show({ errors: Response.data.Status.Reason });
+						}
 
-								Notifications.show({ errors: Response.data.Status.Reason });
-							}
+						Products.updateStock();
 
-							$rootScope.$emit('closedialog');
-						});
-					})
+						$rootScope.$emit('closedialog');
+					});
 				}, 200);			
 			}					
 
@@ -339,7 +341,9 @@ APP.directive(
 							StockCell.color('#ffffff');							
 						}
 					}
-				});
+				});												
+			
+				$scope.AllowApply = true;			
 			});
 
 			// Load Agora Stock data
