@@ -6,6 +6,7 @@ APP.directive(
 
     function controller(
       $http,
+      $rootScope,
       $scope, 
       Notifications, 
       Products,
@@ -31,7 +32,8 @@ APP.directive(
         },
         complete: function() {
 
-          $scope.imageGridConfig.dataSource.read();
+          $scope.imageGridConfig.dataSource.read()
+          .then(Products.updateImages);
         },
         validation: {
           allowedExtensions: ['.jpg', '.jpeg', '.png', '.gif'],          
@@ -122,9 +124,19 @@ APP.directive(
        }
       }
 
-      $scope.refresh = function() {
+      $scope.refresh = function() {              
 
-        Images.DS.read();
+        $rootScope.$broadcast('opendialog', {
+          Title: 'Web images'
+        });
+        $rootScope.$emit('notifydialog', { text: 'Updating list...' });
+
+        Images.DS.read()
+        .then(function() {
+
+          Products.updateImages();
+          $rootScope.$emit('closedialog');
+        });
       }
       
       $scope.openall = function() {

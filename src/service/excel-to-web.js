@@ -231,6 +231,8 @@ function (
 		var Families = {};
 		var ProductRows = [];
 
+		Categories.ProductsFamily = {};
+
 		/* Rows to array of row objects */
 
 		RowsRange.forEachRow(function(R, Index) {
@@ -245,10 +247,19 @@ function (
 			var SKU = jQuery.trim(Row['Código Barras']);
 			if(SKU) {
 
-				if(Row.Familia) { Families[Row.Familia] = '';	} // Dummy for unique values
+				if(Row.Familia) { 
+					
+					Families[Row.Familia] = ''; // Dummy for unique values
+					Categories.ProductsFamily[SKU] = Row.Familia;
+				} 
+
 				ProductRows.push(Row);
 			} 
-		});
+		});		
+		
+		/* Products family relations TODO Errors */
+
+		Categories.saveProductsFamily();
 		
 		/* Categories based in family mapping */
 

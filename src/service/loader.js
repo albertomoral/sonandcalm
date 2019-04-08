@@ -18,7 +18,8 @@ function (
 		'FieldsFootPrint': false,
 		'ParentSKU': false,
 		'ExcelStock': false,
-		'ExcelAgora': false
+		'ExcelAgora': false,
+		'ProductsFamily': false
 	};
 	var Done = {
 		'ProductsResources': false,
@@ -53,7 +54,8 @@ function (
 			Loaded['ColorSize'] &&
 			Loaded['MaxUploadSize'] &&
 			Loaded['Images'] &&
-			Loaded['ProductsStock']
+			Loaded['ProductsStock'] && 
+			Loaded['ProductsFamily']
 		) { done('ProductsResources'); }
 
 		// ------------------------------

@@ -8,6 +8,8 @@ function (
 	$timeout,
 	$rootScope,
 	Stock,
+	Images,
+	Categories,
 	Notifications,
 	Loader
 ) {
@@ -39,9 +41,10 @@ function (
 		'gallery_image_ids'
 	]
 
-	function calculateChanges(SKU) {
+	function calculateAgoraWebChanges(SKU) {
 
 		/*
+		console.log('----------------------------------------------------');
 		console.log(Self.WebData[SKU]); 
 		console.log(Self.AgoraData[SKU]);
 		*/
@@ -107,6 +110,10 @@ function (
 		calculateStock(SKU);
 	}	
 
+	/* -------------------------------------------------------------------------
+		Update stock in actual products
+	*/
+
 	function calculateStock(SKU) {							
 
 		if(Self.TempData[SKU].type == 'variable') {
@@ -161,13 +168,228 @@ function (
 	*/
 
 	Self.CanUpdateWeb = true; // Cannot update web if export stock is negative;
-
 	Self.updateStock = function() {
 
 		Self.CanUpdateWeb = true;
 
 		Object.keys(Self.TempData)
 		.forEach(calculateStock);		
+
+		visualize();
+	}
+
+	/* -------------------------------------------------------------------------
+		Update categories when relations change
+	*/
+
+	function calculateCategories(SKU) {
+
+		var Type = Self.TempData[SKU].type;
+		var NewCategoryIds;
+
+		Self.TempData[SKU].changes = Self.TempData[SKU].changes || [];
+
+		switch(Type) {
+
+			case 'simple':
+
+				var ProductFamily = Categories.ProductsFamily[SKU];  
+				NewCategoryIds = Categories.FamilyCategories[ProductFamily] || [Categories.UncategorizedId];
+
+				break;
+
+			case 'variable':
+
+				var ProductVariations = _.filter(Self.TempData, function(Product) {
+
+					return Product.parent_sku == SKU;
+				});
+
+				NewCategoryIds = ProductVariations.reduce(function(Accumulate, Variation) {
+
+					var VariationFamily = Categories.ProductsFamily[Variation.sku]; 
+					var VariationCategories = Categories.FamilyCategories[VariationFamily] || [Categories.UncategorizedId];          
+					Accumulate = _.union(Accumulate, VariationCategories);
+	
+					return Accumulate;
+	
+				}, []);
+
+				break;
+		}	
+
+		var OldCategories = [].concat(Self.TempData[SKU].category_ids).sort().join();
+		var NewCategories = [].concat(NewCategoryIds).sort().join();
+
+		if(OldCategories != NewCategories) {					
+				
+			Self.TempData[SKU].category_ids = NewCategoryIds;
+			Self.TempData[SKU].status = 'changed';
+			Self.TempData[SKU].changes.push('category_ids');
+		}
+	}
+
+	Self.updateCategories = function() {
+
+		Object.keys(Self.TempData)
+		.forEach(calculateCategories);
+
+		/* visualize result */
+
+		visualize();
+	}	
+
+	/* -------------------------------------------------------------------------
+		Update images when upload new images
+	*/
+
+	function calculateImages(SKU) {
+
+		var Type = Self.TempData[SKU].type;
+		var ProductImages = Images.Group[SKU] && 
+												Images.Group[SKU].items &&
+												Images.Group[SKU].items.map(function(Image) {
+
+													return Image.attid;
+												});
+		var NewImageId;
+		var NewGalleryImageIds = [];
+
+		Self.TempData[SKU].changes = Self.TempData[SKU].changes || [];
+
+		switch(Type) {
+
+			case 'simple':
+			
+				NewImageId = ProductImages && 
+										(ProductImages.length > 0 ) && 
+										 ProductImages.shift();
+				NewGalleryImageIds = ProductImages && 
+														 ProductImages.length > 0 ? 
+															 ProductImages
+															 : 
+															 [];
+
+				break;
+
+			case 'variable':
+
+				var ProductVariations = _.filter(Self.TempData, function(Product) {
+
+					return Product.parent_sku == SKU;
+				});
+				var ProductImages = ProductVariations.reduce(function(Accumulate, Variation) {
+
+					var VariationImages = Images.Group[Variation.sku];
+					
+					if(VariationImages) {
+
+						var VariationImagesIds = VariationImages
+						.items
+						.map(
+							function(Image) { 
+								return Image.attid;
+							}
+						);
+
+						Accumulate = Accumulate.concat(VariationImagesIds);
+					}
+
+					return Accumulate;
+
+				}, []);
+
+				if(ProductImages.length > 0) {
+
+					NewImageId = ProductImages.shift();
+				}
+
+				if(ProductImages.length > 0) {
+
+					NewGalleryImageIds = _.unique(NewGalleryImageIds.concat(ProductImages));
+				}
+
+				/* Variations */	
+					
+					/*					
+
+				_.filter(Self.TempData, function(Product) {
+					
+					return Product.parent_sku == SKU;
+				})
+				.forEach(function(Variation) {
+
+					var VariationImages = Images.Group[Variation.sku];
+					var VariationImagesIds;			
+					if(VariationImages) {
+			
+						VariationImagesIds = VariationImages
+						.items
+						.map(
+							function(Image) { 
+								return Image.attid;
+							}
+						);
+					}
+			
+					// Pick only first for variation rest for product gallery
+			
+					if(VariationImagesIds && VariationImagesIds.length > 0) {
+			
+						var NewVariationImageId = VariationImagesIds.shift();	
+
+						if(Variation.image_id != NewVariationImageId) {	
+
+							console.log('sdf ' + Variation.image_id + ' ' + NewVariationImageId);
+
+							Variation.changes = Variation.changes || [];					
+							Variation.image_id = NewVariationImageId;
+							Variation.status = 'changed';
+							Variation.changes.push('image_id');
+						}
+			
+						if(VariationImagesIds.length > 0) {
+			
+							NewGalleryImageIds = _.unique(NewGalleryImageIds.concat(VariationImagesIds));
+						}
+					}
+				});
+					*/
+
+				break;
+		}	
+
+		if(
+			Type == 'simple' || 
+			Type == 'variable'
+		) {
+
+			if(NewImageId != Self.TempData[SKU].image_id) {					
+					
+				Self.TempData[SKU].image_id = NewImageId;
+				Self.TempData[SKU].status = 'changed';
+				Self.TempData[SKU].changes.push('image_id');
+			}	
+
+			var OldGalleryImages = [].concat(Self.TempData[SKU].gallery_image_ids).sort().join();
+			var NewGalleryImages = [].concat(NewGalleryImageIds).sort().join();
+
+			if(OldGalleryImages != NewGalleryImages) {					
+					
+				Self.TempData[SKU].gallery_image_ids = NewGalleryImageIds;
+				Self.TempData[SKU].status = 'changed';
+				Self.TempData[SKU].changes.push('gallery_image_ids');
+			}
+		}
+	}
+
+	Self.updateImages = function() {
+
+		Object.keys(Self.TempData)
+		.sort()
+		.forEach(calculateImages);
+
+		/* visualize result */
 
 		visualize();
 	}
@@ -201,7 +423,7 @@ function (
 
 			/* Update if changed */
 
-			else { calculateChanges(SKU); }
+			else { calculateAgoraWebChanges(SKU); }
 			
 		});
 
@@ -319,12 +541,19 @@ function (
 					Product.parent_sku = Product.parent_sku || null; // Tree View
 					Self.WebData[Product.sku] = Product;
 				});
-
 										
 				Self.AgoraData = JSON.parse(JSON.stringify(Self.WebData));						
 				Self.TempData = JSON.parse(JSON.stringify(Self.WebData));
 
-				Self.updateStock();
+				Object.keys(Self.TempData)
+				.sort()
+				.forEach(function(SKU) {
+					
+					calculateStock(SKU);
+					calculateImages(SKU);
+				});	
+
+				visualize();
 			}
 		);
 

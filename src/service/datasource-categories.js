@@ -11,7 +11,8 @@ function (
 
 	var Self = {};
 
-	/* WEB CATEGORIES */
+	/* -----------------------------------------------------------------------------
+		WEB CATEGORIES */
 	
 	var TreeData; // Buffer for construct tree		
 
@@ -43,7 +44,7 @@ function (
 	Self.RemoteDS = new kendo.data.DataSource ({
 		transport: {
 			read: {
-				url: '/wp-json/poeticsoft/woo-products-categories-read',
+				url: '/wp-json/poeticsoft/woo-products-categories-read', // Actual woo commerce categories 
 				type: 'GET',
 				dataType: 'json'
 			}
@@ -81,7 +82,8 @@ function (
 	});
 	Self.RemoteDS.read();
 	
-	// Data source for FamiliesListViewConfig in Categories directive
+	/* -----------------------------------------------------------------------------
+		Data source for FamiliesListViewConfig in Categories directive */
 
 	Self.RelationsDS = new kendo.data.DataSource ({
 		transport: {
@@ -114,11 +116,13 @@ function (
 		}
 	});
 
+	/* -----------------------------------------------------------------------------
+		Families loaded from Agora excel*/ 
+
 	Self.updateFamilies = function(FamiliesList) {
 
 		// Remove inexistent families
 
-		var RemoveIndex = [];
 		Self.RelationsDS
 		.data()
 		.toJSON()
@@ -172,6 +176,61 @@ function (
 			var Code = Response.data.Status.Code;
 			if(Code == 'KO'){ 
 
+				return Notifications.show({ errors: Response.data.Status.Reason });
+			}
+
+			Self.updateFamiliesCategories();
+
+			$Q.resolve();
+		});
+
+		return $Q.promise;
+	}	
+
+	/* -----------------------------------------------------------------------------
+		Products Family */ 
+
+	Self.ProductsFamily = {};
+	
+	Self.loadProductsFamily = function() {		
+
+		var $Q = $q.defer();
+		
+		$http.get(
+			'/wp-json/poeticsoft/woo-products-family-read'
+		)
+		.then(function(Response) {
+
+			var Code = Response.data.Status.Code;
+			if(Code == 'KO'){ 
+
+				return Notifications.show({ errors: Response.data.Status.Reason });
+			}
+
+			Self.ProductsFamily = Response.data.Data;
+
+			Loader.ready('ProductsFamily');
+
+			$Q.resolve();
+		});
+
+		return $Q.promise;
+	}
+	Self.loadProductsFamily();
+
+	Self.saveProductsFamily = function() {		
+
+		var $Q = $q.defer();
+		
+		$http.post(
+			'/wp-json/poeticsoft/woo-products-family-update',
+			Self.ProductsFamily
+		)
+		.then(function(Response) {
+
+			var Code = Response.data.Status.Code;
+			if(Code == 'KO'){ 
+
 				Notifications.show({ errors: Response.data.Status.Reason });
 			}
 
@@ -179,7 +238,9 @@ function (
 		});
 
 		return $Q.promise;
-	}
+	}	
+
+	/* ----------------------------------------------------------------------------- */ 
 
 	return Self;
 });

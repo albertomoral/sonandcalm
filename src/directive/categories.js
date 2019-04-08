@@ -7,17 +7,19 @@ APP.directive(
     function controller(
       $rootScope,
       $scope,
-      $timeout,
       Notifications, 
-      Categories
+      Categories,
+      Products
     ) {
 
       $scope.SelectedCategorieId = null;
       $scope.TreeChanged = false;
+      $scope.FamilySelectionChanged = false;
 
       function loadRelations(E) {
 
         $scope.FamiliesListView.clearSelection();
+        $scope.FamilySelectionChanged = false;
 
         if(E) {
 
@@ -48,7 +50,9 @@ APP.directive(
         var NewList = [];
         List.forEach(function(Item) {
 
-          if(Item != $scope.SelectedCategorieId) { NewList.push(Item); }
+          if(Item != $scope.SelectedCategorieId) { 
+            
+            NewList.push(Item); }
         });
 
         return NewList;
@@ -65,6 +69,8 @@ APP.directive(
       }
 
       $scope.updateRelations = function(E) {
+
+        $scope.FamilySelectionChanged = false;
 
         var $Selection = $scope.FamiliesListView.select();
         var SelectedFamilies = [];
@@ -96,6 +102,26 @@ APP.directive(
         loadRelations();
       }
 
+      /* -------------------------------------------------------------------
+        Change family selection TODO real changes */
+
+      function changeFamilySelection(E) {
+
+        var IsSelected = jQuery(E.target).hasClass('k-state-selected');
+        var CtrlKey = E.ctrlKey;
+
+        if(!(IsSelected && !CtrlKey)) {
+
+          $scope.$apply(function() {
+
+            $scope.FamilySelectionChanged = true;
+          });
+        }
+      }
+
+      /* -------------------------------------------------------------------
+        Back to last saved relations  */
+
       $scope.revert = function() {
 
         Notifications.show('Revert relations to saved...', true);
@@ -117,24 +143,14 @@ APP.directive(
         $rootScope.$broadcast('opendialog', {
           Title: 'Saving Families Categories relations...'
         });
-        $rootScope.$emit('notifydialog', { text: 'Saving...' }); 
+        $rootScope.$emit('notifydialog', { text: 'Saving and updating products...' }); 
 
         Categories.saveRelations()
         .then(function() {
-
-          $rootScope.$emit('notifydialog', { text: 'Updatin products...' }); 
-
-          $timeout(function() {
-
-            Products.updateCategories()
-            .then(function() {
-
-              $timeout(function() {        					
           
-                $rootScope.$emit('closedialog');
-              }, 200);
-            });
-          }, 200);
+          Products.updateCategories();
+            
+          $rootScope.$emit('closedialog');
         });
       }
 
@@ -164,6 +180,11 @@ APP.directive(
         if (widget === $scope.CategoriesTreeView) {
           
           $scope.CategoriesTreeView.element.on('click', '.TreeViewItem', loadRelations);
+        }
+      
+        if (widget === $scope.FamiliesListView) {
+          
+          $scope.FamiliesListView.element.on('mousedown', '.ListViewItem', changeFamilySelection);          
         }
       });
     }
@@ -196,7 +217,7 @@ APP.directive(
           </div>
           <div class="Tools">
             <button ng-click="updateRelations()"
-                    ng-disabled="!SelectedCategorieId"
+                    ng-disabled="!FamilySelectionChanged"
                     class="k-button">
               Update Relation
             </button>

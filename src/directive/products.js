@@ -28,9 +28,15 @@ function() {
 
     $scope.assignedImages = function(Item) {
 
-      return (Item.image_id ? 1 : 0) + 
-              ' / ' + 
-              ((Item.gallery_image_ids && Item.gallery_image_ids.length) || 0);
+      if(Item.type == 'variation') {
+
+        return Item.image_id ? 1 : 0;
+      } else {
+
+        return (Item.image_id ? 1 : 0) + 
+                ' / ' + 
+               ((Item.gallery_image_ids && Item.gallery_image_ids.length) || 0);
+      }
     }
 
     $scope.statusChanged = function(Item) {
@@ -186,7 +192,8 @@ function() {
         Stock.saveState()
         .then(function() {
 
-          Categories.saveRelations();
+          Categories.saveRelations();       // TODO Errors
+          Categories.saveProductsFamily();
 
           Products.saveToWeb()
           .then(function() {
@@ -246,6 +253,11 @@ function() {
               return '<div>(' + ID + ') ' + Text + '</div>';
             })
             .join('');
+          }
+
+          if(Key == 'gallery_image_ids') {
+
+            Field = Field.join(' - ');
           }
 
           if(

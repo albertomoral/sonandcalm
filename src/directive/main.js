@@ -53,8 +53,8 @@ function() {
 					<div kendo-tab-strip>
 						<ul>
 							<li>Products</li>
-							<li class="k-state-active">Categories</li>
-							<li>Images</li>
+							<li>Categories</li>
+							<li class="k-state-active">Images</li>
 						</ul>
 						<poeticsoft-woo-agora-products></poeticsoft-woo-agora-products>                        
 						<poeticsoft-woo-agora-categories></poeticsoft-woo-agora-categories>
